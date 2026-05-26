@@ -1,0 +1,49 @@
+name: 🚀 Deploy Navix App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚀 Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+
+            echo "🚀 Starting deployment..."
+
+            cd /var/www/navix
+
+            git config --global --add safe.directory /var/www/navix
+
+            echo "Pulling latest code..."
+            git pull origin main
+
+            echo "Installing dependencies..."
+            composer install --no-dev --optimize-autoloader
+
+            echo "Running migrations..."
+            php artisan migrate --force || true
+
+            echo "Clearing caches..."
+            php artisan config:clear
+            php artisan cache:clear
+
+            echo "Rebuilding caches..."
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            echo "Fixing permissions..."
+            chown -R www-data:www-data /var/www/navix
+
+            echo "✅ Deployment complete"
