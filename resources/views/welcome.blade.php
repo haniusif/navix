@@ -1,15 +1,23 @@
+@php
+    $locale = app()->getLocale();
+    $isRtl = $locale === 'ar';
+    $dir = $isRtl ? 'rtl' : 'ltr';
+    $switchUrl = $isRtl ? url('/en') : url('/');
+@endphp
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="{{ $locale }}" dir="{{ $dir }}">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>NAVIX | حلول لوجستية ذكية — نربط أعمالك، نوصل بثقة</title>
-<meta name="description" content="NAVIX — حلول لوجستية متكاملة: تخزين، تجهيز طلبات، شحن، وتوصيل أخير في جميع أنحاء المملكة. Smart Fulfillment, Delivered." />
+<title>{{ __('landing.meta.title') }}</title>
+<meta name="description" content="{{ __('landing.meta.description') }}" />
+<link rel="alternate" hreflang="ar" href="{{ url('/') }}" />
+<link rel="alternate" hreflang="en" href="{{ url('/en') }}" />
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%230A1A35'/%3E%3Ctext x='12' y='17' font-family='Arial' font-weight='900' font-size='14' fill='%23F47B20' text-anchor='middle'%3EX%3C/text%3E%3C/svg%3E">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
   :root {
@@ -39,6 +47,11 @@
 
     --shadow-card: 0 10px 30px -12px rgba(10, 26, 53, 0.35);
     --shadow-elev: 0 20px 50px -20px rgba(244, 123, 32, 0.35);
+  }
+
+  [dir="ltr"] {
+    --font-display: 'Space Grotesk', 'Inter', sans-serif;
+    --font-body: 'Inter', sans-serif;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -103,7 +116,9 @@
   }
   .btn-ghost:hover { border-color: var(--orange-400); color: var(--orange-400); }
   .btn .arrow { transition: transform 0.25s; }
-  .btn:hover .arrow { transform: translateX(-4px); }
+  [dir="rtl"] .btn .arrow { transform: scaleX(-1); }
+  [dir="rtl"] .btn:hover .arrow { transform: scaleX(-1) translateX(4px); }
+  [dir="ltr"] .btn:hover .arrow { transform: translateX(4px); }
 
   .nav-wrap {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
@@ -168,6 +183,14 @@
     font-size: 13px; font-weight: 600;
     cursor: pointer;
     display: flex; align-items: center; gap: 6px;
+    text-decoration: none;
+    font-family: var(--font-display);
+    transition: all 0.2s;
+  }
+  .lang-btn:hover {
+    background: rgba(244,123,32,0.15);
+    color: var(--orange-400);
+    border-color: rgba(244,123,32,0.3);
   }
   .nav-cta .btn { padding: 11px 20px; font-size: 14px; }
   .menu-toggle { display: none; background: none; border: none; color: white; cursor: pointer; }
@@ -238,11 +261,12 @@
     width: 32px; height: 32px; border-radius: 50%;
     background: linear-gradient(135deg, var(--orange-400), var(--orange-500));
     border: 2px solid var(--navy-900);
-    margin-left: -10px;
+    margin-inline-start: -10px;
     display: flex; align-items: center; justify-content: center;
     font-size: 11px; font-weight: 700; color: white;
     font-family: var(--font-num);
   }
+  .avatar:first-child { margin-inline-start: 0; }
   .avatar:nth-child(2) { background: linear-gradient(135deg, #4A90E2, #357ABD); }
   .avatar:nth-child(3) { background: linear-gradient(135deg, #50C9B5, #2E9D8C); }
   .avatar:nth-child(4) { background: linear-gradient(135deg, #B968D9, #8E44AD); }
@@ -272,8 +296,8 @@
     box-shadow: var(--shadow-card);
     z-index: 3;
   }
-  .floating-card.fc-1 { top: 60px; right: -10px; }
-  .floating-card.fc-2 { bottom: 80px; left: -20px; }
+  .floating-card.fc-1 { top: 60px; inset-inline-end: -10px; }
+  .floating-card.fc-2 { bottom: 80px; inset-inline-start: -20px; }
   .fc-icon {
     width: 38px; height: 38px;
     border-radius: 10px;
@@ -310,9 +334,9 @@
   .stat {
     text-align: center;
     padding: 0 16px;
-    border-left: 1px solid rgba(255,255,255,0.08);
+    border-inline-start: 1px solid rgba(255,255,255,0.08);
   }
-  .stat:last-child { border-left: none; }
+  .stat:first-child { border-inline-start: none; }
   .stat-icon {
     width: 48px; height: 48px;
     border-radius: 12px;
@@ -355,12 +379,13 @@
   .service-card::before {
     content: "";
     position: absolute;
-    top: 0; right: 0;
+    top: 0; inset-inline-end: 0;
     width: 60px; height: 4px;
     background: var(--orange-500);
     transform: translateX(100%);
     transition: transform 0.35s ease;
   }
+  [dir="rtl"] .service-card::before { transform: translateX(-100%); }
   .service-card:hover {
     transform: translateY(-6px);
     border-color: rgba(244,123,32,0.3);
@@ -387,6 +412,7 @@
     font-size: 13px; font-weight: 600;
     display: flex; align-items: center; gap: 6px;
   }
+  [dir="rtl"] .more svg { transform: scaleX(-1); }
 
   .how-section {
     padding: 100px 0;
@@ -398,7 +424,7 @@
   .how-section::before {
     content: "";
     position: absolute;
-    top: -100px; left: -100px;
+    top: -100px; inset-inline-start: -100px;
     width: 400px; height: 400px;
     background: radial-gradient(circle, rgba(244,123,32,0.08), transparent 70%);
     pointer-events: none;
@@ -516,9 +542,9 @@
     padding: 16px;
     box-shadow: var(--shadow-card);
   }
-  .why-badge.wb-1 { top: 40px; right: 40px; min-width: 180px; }
-  .why-badge.wb-2 { bottom: 80px; left: 40px; min-width: 200px; }
-  .why-badge.wb-3 { top: 50%; right: 30%; transform: translateY(-50%); min-width: 160px; }
+  .why-badge.wb-1 { top: 40px; inset-inline-end: 40px; min-width: 180px; }
+  .why-badge.wb-2 { bottom: 80px; inset-inline-start: 40px; min-width: 200px; }
+  .why-badge.wb-3 { top: 50%; inset-inline-end: 30%; transform: translateY(-50%); min-width: 160px; }
   .wb-title { font-size: 12px; color: var(--ink-400); margin-bottom: 4px; }
   .wb-val { font-family: var(--font-num); font-weight: 700; color: var(--white); font-size: 18px; }
   .wb-progress {
@@ -581,7 +607,7 @@
   .cta-box::before {
     content: "";
     position: absolute;
-    top: -50%; left: -10%;
+    top: -50%; inset-inline-start: -10%;
     width: 60%; height: 200%;
     background: rgba(255,255,255,0.05);
     transform: rotate(20deg);
@@ -710,7 +736,7 @@
     .auth-link { display: none; }
     .hero { padding: 110px 0 60px; }
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .stat { border-left: none; }
+    .stat { border-inline-start: none; }
     .services-grid { grid-template-columns: 1fr; }
     .flow-steps { grid-template-columns: 1fr; }
     .why-features { grid-template-columns: 1fr; }
@@ -727,31 +753,31 @@
 
 <div class="nav-wrap">
   <nav>
-    <a href="{{ url('/') }}" class="brand" aria-label="NAVIX">
+    <a href="{{ $isRtl ? url('/') : url('/en') }}" class="brand" aria-label="NAVIX">
       <span>NAVI</span><span class="x">X</span>
     </a>
     <ul class="nav-links">
-      <li><a href="#home" class="active">الرئيسية</a></li>
-      <li><a href="#services">خدماتنا</a></li>
-      <li><a href="#how">كيف نعمل</a></li>
-      <li><a href="#why">لماذا نافيكس</a></li>
-      <li><a href="#partners">شركاؤنا</a></li>
-      <li><a href="#contact">تواصل معنا</a></li>
+      <li><a href="#home" class="active">{{ __('landing.nav.home') }}</a></li>
+      <li><a href="#services">{{ __('landing.nav.services') }}</a></li>
+      <li><a href="#how">{{ __('landing.nav.how') }}</a></li>
+      <li><a href="#why">{{ __('landing.nav.why') }}</a></li>
+      <li><a href="#partners">{{ __('landing.nav.partners') }}</a></li>
+      <li><a href="#contact">{{ __('landing.nav.contact') }}</a></li>
     </ul>
     <div class="nav-cta">
       @auth
-        <a href="{{ url('/dashboard') }}" class="auth-link">لوحة التحكم</a>
+        <a href="{{ url('/dashboard') }}" class="auth-link">{{ __('landing.nav.dashboard') }}</a>
       @else
         @if (Route::has('login'))
-          <a href="{{ route('login') }}" class="auth-link">تسجيل الدخول</a>
+          <a href="{{ route('login') }}" class="auth-link">{{ __('landing.nav.login') }}</a>
         @endif
       @endauth
-      <button class="lang-btn" type="button" aria-label="language">
+      <a href="{{ $switchUrl }}" class="lang-btn" aria-label="Switch language">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
-        EN
-      </button>
+        {{ __('landing.nav.lang_switch_label') }}
+      </a>
       <a href="#contact" class="btn btn-primary">
-        اطلب عرض سعر
+        {{ __('landing.nav.quote_cta') }}
         <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       </a>
     </div>
@@ -764,20 +790,21 @@
 <section class="hero" id="home">
   <div class="container hero-grid">
     <div class="hero-copy">
-      <span class="eyebrow">Smart Fulfillment, Delivered</span>
+      <span class="eyebrow">{{ __('landing.hero.eyebrow') }}</span>
       <h1>
-        نوصِّل ما يهمّك<br>
-        في <span class="accent">الوقت المحدد</span>
+        {{ __('landing.hero.title_line_1') }}<br>
+        @if (trim(__('landing.hero.title_line_2_prefix')) !== '')
+          {{ __('landing.hero.title_line_2_prefix') }}
+        @endif
+        <span class="accent">{{ __('landing.hero.title_accent') }}</span>
       </h1>
-      <p>
-        حلول لوجستية ذكية متكاملة — من التخزين إلى تجهيز الطلبات وحتى التوصيل الأخير. نربط أعمالك بعملائك في جميع أنحاء المملكة بأعلى معايير الجودة والأمان.
-      </p>
+      <p>{{ __('landing.hero.paragraph') }}</p>
       <div class="hero-cta">
         <a href="#contact" class="btn btn-primary">
-          ابدأ مع نافيكس
+          {{ __('landing.hero.cta_primary') }}
           <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </a>
-        <a href="#services" class="btn btn-ghost">استكشف خدماتنا</a>
+        <a href="#services" class="btn btn-ghost">{{ __('landing.hero.cta_secondary') }}</a>
       </div>
       <div class="hero-trust">
         <div class="avatars">
@@ -786,7 +813,7 @@
           <div class="avatar">IH</div>
           <div class="avatar">+</div>
         </div>
-        <span>أكثر من <strong style="color:var(--white)">500 شركة</strong> تثق بنا لإدارة عملياتها اللوجستية</span>
+        <span>{!! __('landing.hero.trust', ['count' => '<strong style="color:var(--white)">' . e(__('landing.hero.trust_count')) . '</strong>']) !!}</span>
       </div>
     </div>
 
@@ -831,7 +858,7 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
         </div>
         <div class="fc-meta">
-          <span class="fc-label">معدل التسليم في الوقت</span>
+          <span class="fc-label">{{ __('landing.hero.fc_label_1') }}</span>
           <span class="fc-value">99.5%</span>
         </div>
       </div>
@@ -839,7 +866,7 @@
       <div class="floating-card fc-2">
         <div class="pulse-dot"></div>
         <div class="fc-meta">
-          <span class="fc-label">شحنة قيد التوصيل الآن</span>
+          <span class="fc-label">{{ __('landing.hero.fc_label_2') }}</span>
           <span class="fc-value">+1,240</span>
         </div>
       </div>
@@ -855,35 +882,35 @@
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
         </div>
         <div class="stat-value">99.5%</div>
-        <div class="stat-label">دقة الطلبات</div>
+        <div class="stat-label">{{ __('landing.stats.accuracy') }}</div>
       </div>
       <div class="stat">
         <div class="stat-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-9 8.5 8.5 8.5 0 01-7.6-4.7L3 21l1.7-1.4A8.38 8.38 0 013 11.5a8.5 8.5 0 0117 0z"/></svg>
         </div>
         <div class="stat-value">24/7</div>
-        <div class="stat-label">دعم وضمانة</div>
+        <div class="stat-label">{{ __('landing.stats.support') }}</div>
       </div>
       <div class="stat">
         <div class="stat-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.27 6.96L12 12l8.73-5.04M12 22.08V12"/></svg>
         </div>
         <div class="stat-value">+1M</div>
-        <div class="stat-label">طلب تمت معالجته</div>
+        <div class="stat-label">{{ __('landing.stats.orders') }}</div>
       </div>
       <div class="stat">
         <div class="stat-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
         </div>
         <div class="stat-value">+50K</div>
-        <div class="stat-label">م² مساحة تخزين</div>
+        <div class="stat-label">{{ __('landing.stats.storage') }}</div>
       </div>
       <div class="stat">
         <div class="stat-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
         </div>
         <div class="stat-value">+500</div>
-        <div class="stat-label">عميل نشط</div>
+        <div class="stat-label">{{ __('landing.stats.clients') }}</div>
       </div>
     </div>
   </div>
@@ -892,50 +919,50 @@
 <section class="services" id="services">
   <div class="container">
     <div class="section-head">
-      <span class="eyebrow">خدماتنا</span>
-      <h2 class="h-section">حلول متكاملة لدعم كل مرحلة من <span class="accent">رحلتك</span></h2>
-      <p class="sub-section">من لحظة استلام البضاعة وحتى وصولها لباب العميل — نوفّر لك كل ما تحتاجه لتنمو بثقة.</p>
+      <span class="eyebrow">{{ __('landing.services.eyebrow') }}</span>
+      <h2 class="h-section">{{ __('landing.services.title_lead') }} <span class="accent">{{ __('landing.services.title_accent') }}</span></h2>
+      <p class="sub-section">{{ __('landing.services.sub') }}</p>
     </div>
     <div class="services-grid">
       <div class="service-card">
         <div class="service-icon">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
         </div>
-        <h3>الشحن والتوصيل</h3>
-        <p>توصيل سريع ضمن المملكة وخارجها عبر شبكة موزّعين موثوقين.</p>
-        <span class="more">المزيد <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span>
+        <h3>{{ __('landing.services.shipping_title') }}</h3>
+        <p>{{ __('landing.services.shipping_desc') }}</p>
+        <span class="more">{{ __('landing.services.more') }} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span>
       </div>
       <div class="service-card">
         <div class="service-icon">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </div>
-        <h3>التوصيل في نفس اليوم</h3>
-        <p>خدمة Same-day delivery داخل المدن الكبرى مع تتبع لحظي للشحنة.</p>
-        <span class="more">المزيد <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span>
+        <h3>{{ __('landing.services.sameday_title') }}</h3>
+        <p>{{ __('landing.services.sameday_desc') }}</p>
+        <span class="more">{{ __('landing.services.more') }} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span>
       </div>
       <div class="service-card">
         <div class="service-icon">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
         </div>
-        <h3>تجهيز الطلبات</h3>
-        <p>التقاط، تغليف، وفهرسة احترافية مع ضمان دقة لا تقل عن 99.5%.</p>
-        <span class="more">المزيد <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span>
+        <h3>{{ __('landing.services.fulfillment_title') }}</h3>
+        <p>{{ __('landing.services.fulfillment_desc') }}</p>
+        <span class="more">{{ __('landing.services.more') }} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span>
       </div>
       <div class="service-card">
         <div class="service-icon">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </div>
-        <h3>التخزين الذكي</h3>
-        <p>مستودعات حديثة بنظام WMS متقدم يناسب احتياجات أعمالك المتغيرة.</p>
-        <span class="more">المزيد <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span>
+        <h3>{{ __('landing.services.warehousing_title') }}</h3>
+        <p>{{ __('landing.services.warehousing_desc') }}</p>
+        <span class="more">{{ __('landing.services.more') }} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span>
       </div>
       <div class="service-card">
         <div class="service-icon">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
         </div>
-        <h3>إدارة المرتجعات</h3>
-        <p>إدارة سلسة وآمنة للمرتجعات مع تقارير شاملة وفحص جودة دقيق.</p>
-        <span class="more">المزيد <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span>
+        <h3>{{ __('landing.services.returns_title') }}</h3>
+        <p>{{ __('landing.services.returns_desc') }}</p>
+        <span class="more">{{ __('landing.services.more') }} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span>
       </div>
     </div>
   </div>
@@ -944,9 +971,9 @@
 <section class="how-section" id="how">
   <div class="container">
     <div class="section-head">
-      <span class="eyebrow">كيف نعمل</span>
-      <h2 class="h-section">عملية بسيطة... <span class="accent">نتائج استثنائية</span></h2>
-      <p class="sub-section">أربع خطوات فقط تفصلك عن نظام لوجستي متكامل يدير عملياتك بكفاءة.</p>
+      <span class="eyebrow">{{ __('landing.how.eyebrow') }}</span>
+      <h2 class="h-section">{{ __('landing.how.title_lead') }} <span class="accent">{{ __('landing.how.title_accent') }}</span></h2>
+      <p class="sub-section">{{ __('landing.how.sub') }}</p>
     </div>
     <div class="how-flow">
       <div class="flow-steps">
@@ -956,32 +983,32 @@
           <div class="step-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           </div>
-          <h4>استلام البضائع</h4>
-          <p>نستلم شحناتك ونفحصها بدقة في مستودعاتنا.</p>
+          <h4>{{ __('landing.how.step_1_title') }}</h4>
+          <p>{{ __('landing.how.step_1_desc') }}</p>
         </div>
         <div class="flow-step">
           <div class="step-num">2</div>
           <div class="step-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
           </div>
-          <h4>التخزين الذكي</h4>
-          <p>تخزين منظم وفهرسة في أفضل الظروف مع إدارة ذكية.</p>
+          <h4>{{ __('landing.how.step_2_title') }}</h4>
+          <p>{{ __('landing.how.step_2_desc') }}</p>
         </div>
         <div class="flow-step">
           <div class="step-num">3</div>
           <div class="step-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
           </div>
-          <h4>تجهيز الطلبات</h4>
-          <p>تجهيز طلبات عملائك بدقة عالية وسرعة قياسية.</p>
+          <h4>{{ __('landing.how.step_3_title') }}</h4>
+          <p>{{ __('landing.how.step_3_desc') }}</p>
         </div>
         <div class="flow-step">
           <div class="step-num">4</div>
           <div class="step-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
           </div>
-          <h4>الشحن والتوصيل</h4>
-          <p>نوصّل سريعاً لعملائك أينما كانوا بسهولة وموثوقية.</p>
+          <h4>{{ __('landing.how.step_4_title') }}</h4>
+          <p>{{ __('landing.how.step_4_desc') }}</p>
         </div>
       </div>
     </div>
@@ -992,57 +1019,57 @@
   <div class="container">
     <div class="why-grid">
       <div>
-        <span class="eyebrow">لماذا نافيكس</span>
-        <h2 class="h-section">شريك لوجستي ذكي لأعمال <span class="accent">تنمو بثقة</span></h2>
-        <p class="sub-section">نختصر عليك تعقيدات اللوجستيات لتركّز أنت على أهم شيء: نمو أعمالك.</p>
+        <span class="eyebrow">{{ __('landing.why.eyebrow') }}</span>
+        <h2 class="h-section">{{ __('landing.why.title_lead') }} <span class="accent">{{ __('landing.why.title_accent') }}</span></h2>
+        <p class="sub-section">{{ __('landing.why.sub') }}</p>
         <div class="why-features">
           <div class="why-item">
             <div class="why-item-icon">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
-            <h4>أمان وموثوقية</h4>
-            <p>تأمين شامل لشحناتك في كل مرحلة من رحلتها.</p>
+            <h4>{{ __('landing.why.item_1_title') }}</h4>
+            <p>{{ __('landing.why.item_1_desc') }}</p>
           </div>
           <div class="why-item">
             <div class="why-item-icon">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
-            <h4>التزام بالمواعيد</h4>
-            <p>التزام صارم بأوقات التسليم المتفق عليها.</p>
+            <h4>{{ __('landing.why.item_2_title') }}</h4>
+            <p>{{ __('landing.why.item_2_desc') }}</p>
           </div>
           <div class="why-item">
             <div class="why-item-icon">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
             </div>
-            <h4>تغطية واسعة</h4>
-            <p>شبكة توصيل تشمل كل مناطق المملكة.</p>
+            <h4>{{ __('landing.why.item_3_title') }}</h4>
+            <p>{{ __('landing.why.item_3_desc') }}</p>
           </div>
           <div class="why-item">
             <div class="why-item-icon">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
             </div>
-            <h4>تتبع لحظي</h4>
-            <p>تتبع شحناتك خطوة بخطوة عبر منصتنا الذكية.</p>
+            <h4>{{ __('landing.why.item_4_title') }}</h4>
+            <p>{{ __('landing.why.item_4_desc') }}</p>
           </div>
         </div>
       </div>
 
       <div class="why-visual">
         <div class="why-badge wb-1">
-          <div class="wb-title">شحنات هذا الشهر</div>
+          <div class="wb-title">{{ __('landing.why.badge_1_title') }}</div>
           <div class="wb-val">+84,200</div>
           <div class="wb-progress"><div class="wb-bar" style="width: 86%"></div></div>
         </div>
         <div class="why-badge wb-2">
-          <div class="wb-title">رضا العملاء</div>
+          <div class="wb-title">{{ __('landing.why.badge_2_title') }}</div>
           <div class="wb-val">4.9 / 5.0</div>
           <div style="display: flex; gap: 2px; margin-top: 8px;">
             <span style="color: var(--orange-400);">★</span><span style="color: var(--orange-400);">★</span><span style="color: var(--orange-400);">★</span><span style="color: var(--orange-400);">★</span><span style="color: var(--orange-400);">★</span>
           </div>
         </div>
         <div class="why-badge wb-3">
-          <div class="wb-title">وقت الاستجابة</div>
-          <div class="wb-val">&lt; 30 ثانية</div>
+          <div class="wb-title">{{ __('landing.why.badge_3_title') }}</div>
+          <div class="wb-val">{{ __('landing.why.badge_3_value') }}</div>
         </div>
       </div>
     </div>
@@ -1051,7 +1078,7 @@
 
 <section class="partners" id="partners">
   <div class="container">
-    <div class="partners-title">نفخر بثقة العلامات التجارية الرائدة</div>
+    <div class="partners-title">{{ __('landing.partners_title') }}</div>
     <div class="partners-logos">
       <div class="partner-logo">noon</div>
       <div class="partner-logo">SHEIN</div>
@@ -1068,17 +1095,17 @@
   <div class="container">
     <div class="cta-box">
       <div>
-        <h2>جاهز لشحن شحنتك مع نافيكس؟</h2>
-        <p>احصل على عرض سعر مخصص لأعمالك خلال 24 ساعة فقط — بدون التزام.</p>
+        <h2>{{ __('landing.cta.title') }}</h2>
+        <p>{{ __('landing.cta.sub') }}</p>
       </div>
       <div class="cta-actions">
         @if (Route::has('register'))
           <a href="{{ route('register') }}" class="btn btn-primary">
-            احصل على عرض سعر
+            {{ __('landing.cta.primary') }}
             <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </a>
         @endif
-        <a href="mailto:info@navix.com.sa" class="btn btn-ghost">تواصل معنا</a>
+        <a href="mailto:info@navix.com.sa" class="btn btn-ghost">{{ __('landing.cta.secondary') }}</a>
       </div>
     </div>
   </div>
@@ -1088,10 +1115,10 @@
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a href="{{ url('/') }}" class="brand">
+        <a href="{{ $isRtl ? url('/') : url('/en') }}" class="brand">
           <span>NAVI</span><span class="x">X</span>
         </a>
-        <p>حلول لوجستية ذكية متكاملة — نقدّم خدمات التخزين، تجهيز الطلبات، الشحن والتوصيل في نفس اليوم، وإدارة المرتجعات لشركات التجارة الإلكترونية في المملكة العربية السعودية.</p>
+        <p>{{ __('landing.footer.brand_desc') }}</p>
         <div class="socials">
           <a href="#" class="social-icon" aria-label="LinkedIn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"/></svg>
@@ -1109,61 +1136,61 @@
       </div>
 
       <div class="footer-col">
-        <h5>خدماتنا</h5>
+        <h5>{{ __('landing.footer.services_heading') }}</h5>
         <ul>
-          <li><a href="#services">التخزين</a></li>
-          <li><a href="#services">تجهيز الطلبات</a></li>
-          <li><a href="#services">الشحن والتوصيل</a></li>
-          <li><a href="#services">التوصيل في نفس اليوم</a></li>
-          <li><a href="#services">إدارة المرتجعات</a></li>
+          <li><a href="#services">{{ __('landing.footer.service_warehousing') }}</a></li>
+          <li><a href="#services">{{ __('landing.footer.service_fulfillment') }}</a></li>
+          <li><a href="#services">{{ __('landing.footer.service_shipping') }}</a></li>
+          <li><a href="#services">{{ __('landing.footer.service_sameday') }}</a></li>
+          <li><a href="#services">{{ __('landing.footer.service_returns') }}</a></li>
         </ul>
       </div>
 
       <div class="footer-col">
-        <h5>حلولنا</h5>
+        <h5>{{ __('landing.footer.solutions_heading') }}</h5>
         <ul>
-          <li><a href="#">التجارة الإلكترونية</a></li>
-          <li><a href="#">الشركات الناشئة</a></li>
-          <li><a href="#">الشركات الكبيرة</a></li>
-          <li><a href="#">تكامل الأنظمة</a></li>
+          <li><a href="#">{{ __('landing.footer.solution_ecom') }}</a></li>
+          <li><a href="#">{{ __('landing.footer.solution_startup') }}</a></li>
+          <li><a href="#">{{ __('landing.footer.solution_enterprise') }}</a></li>
+          <li><a href="#">{{ __('landing.footer.solution_integration') }}</a></li>
         </ul>
       </div>
 
       <div class="footer-col">
-        <h5>روابط سريعة</h5>
+        <h5>{{ __('landing.footer.quick_heading') }}</h5>
         <ul>
-          <li><a href="#">من نحن</a></li>
-          <li><a href="#">الأسعار</a></li>
-          <li><a href="#">الموارد</a></li>
-          <li><a href="#">المدونة</a></li>
-          <li><a href="#contact">تواصل معنا</a></li>
+          <li><a href="#">{{ __('landing.footer.quick_about') }}</a></li>
+          <li><a href="#">{{ __('landing.footer.quick_pricing') }}</a></li>
+          <li><a href="#">{{ __('landing.footer.quick_resources') }}</a></li>
+          <li><a href="#">{{ __('landing.footer.quick_blog') }}</a></li>
+          <li><a href="#contact">{{ __('landing.footer.quick_contact') }}</a></li>
         </ul>
       </div>
 
       <div class="footer-col">
-        <h5>تواصل معنا</h5>
+        <h5>{{ __('landing.footer.contact_heading') }}</h5>
         <ul>
           <li class="contact-li">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
-            +966 9200 12345
+            <span dir="ltr">+966 9200 12345</span>
           </li>
           <li class="contact-li">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            info@navix.com.sa
+            <span dir="ltr">info@navix.com.sa</span>
           </li>
           <li class="contact-li">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            الرياض، المملكة العربية السعودية
+            {{ __('landing.footer.address') }}
           </li>
         </ul>
       </div>
     </div>
 
     <div class="footer-bottom">
-      <div>© {{ date('Y') }} NAVIX Logistics Services — جميع الحقوق محفوظة</div>
+      <div>© {{ date('Y') }} NAVIX Logistics Services — {{ __('landing.footer.copyright') }}</div>
       <div class="footer-bottom-links">
-        <a href="#">سياسة الخصوصية</a>
-        <a href="#">الشروط والأحكام</a>
+        <a href="#">{{ __('landing.footer.privacy') }}</a>
+        <a href="#">{{ __('landing.footer.terms') }}</a>
         <a href="https://navix.com.sa">navix.com.sa</a>
       </div>
     </div>
