@@ -26,6 +26,8 @@ Marketing website for **NAVIX** (smart logistics, fulfillment, warehousing, tran
 | `/` · `/en` | Home (landing) |
 | `/track` · `/en/track` | Shipment tracking (live) |
 | `/partners` · `/en/partners` | Partners |
+| `/privacy` · `/en/privacy` | Privacy Policy |
+| `/terms` · `/en/terms` | Terms & Conditions |
 | `/track/lookup/{id}` | JSON proxy for the tracking API (internal) |
 | `/dashboard` | App dashboard (auth) |
 
@@ -85,7 +87,7 @@ Pushing to `main` triggers the GitHub Actions SSH deploy workflow.
 
 ## Internationalization
 
-- Translations live in `lang/en/*.php` and `lang/ar/*.php` (`landing`, `tracking`, `partners`).
+- Translations live in `lang/en/*.php` and `lang/ar/*.php` (`landing`, `tracking`, `partners`, `legal`).
 - `dir="rtl"` is applied for Arabic; layout uses logical CSS properties so components mirror automatically.
 
 ---
@@ -127,6 +129,7 @@ resources/
     welcome.blade.php    home
     tracking.blade.php   shipment tracking
     partners.blade.php   partners
+    legal.blade.php      privacy policy & terms (shared template)
     layouts/site.blade.php  shared chrome (nav, footer, JS)
 routes/web.php          routes + tracking proxy
 config/services.php     Rushly config
