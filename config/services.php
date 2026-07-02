@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    // Rushly public shipment-tracking API (proxied server-side; key never exposed to the browser).
+    'rushly' => [
+        'key' => env('RUSHLY_API_KEY'),
+        'base_url' => env('RUSHLY_BASE_URL', 'https://navix.rushly.tech/api/public'),
+    ],
+
 ];

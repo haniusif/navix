@@ -3,6 +3,7 @@
     $isRtl = $locale === 'ar';
     $dir = $isRtl ? 'rtl' : 'ltr';
     $switchUrl = $isRtl ? url('/en') : url('/');
+    $homeUrl = $isRtl ? url('/') : url('/en');
 @endphp
 <!DOCTYPE html>
 <html lang="{{ $locale }}" dir="{{ $dir }}">
@@ -11,42 +12,52 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>{{ __('landing.meta.title') }}</title>
 <meta name="description" content="{{ __('landing.meta.description') }}" />
+<meta name="theme-color" content="#07111F" />
 <link rel="alternate" hreflang="ar" href="{{ url('/') }}" />
 <link rel="alternate" hreflang="en" href="{{ url('/en') }}" />
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%230A1A35'/%3E%3Ctext x='12' y='17' font-family='Arial' font-weight='900' font-size='14' fill='%23F47B20' text-anchor='middle'%3EX%3C/text%3E%3C/svg%3E">
+<meta property="og:title" content="{{ __('landing.meta.title') }}" />
+<meta property="og:description" content="{{ __('landing.meta.description') }}" />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="{{ asset('images/hero.png') }}" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%2307111F'/%3E%3Ctext x='12' y='17' font-family='Arial' font-weight='900' font-size='14' fill='%23FF7A1A' text-anchor='middle'%3EX%3C/text%3E%3C/svg%3E">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="image" href="{{ asset('images/hero.png') }}">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+{{-- Live Remotion motion islands (lazy, reduced-motion aware). Progressively enhances the hero & CTA. --}}
+@viteReactRefresh
+@vite(['resources/js/motion.tsx'])
 
 <style>
   :root {
-    --navy-900: #0A1A35;
-    --navy-800: #0F2548;
-    --navy-700: #16315C;
-    --navy-600: #1E3D72;
-    --navy-500: #2E4D85;
-    --orange-500: #F47B20;
-    --orange-400: #FF8C2E;
-    --orange-300: #FFA557;
-    --ink-100: #F5F7FB;
-    --ink-200: #E4E8F0;
-    --ink-300: #B8C0CF;
-    --ink-400: #8290A8;
+    --bg: #07111F;
+    --secondary: #0F172A;
+    --surface: #111C2E;
+    --surface-2: #16233A;
+    --primary: #FF7A1A;
+    --primary-light: #FF9A4D;
+    --primary-deep: #E8620A;
     --white: #FFFFFF;
+    --muted: #94A3B8;
+    --muted-2: #64748B;
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.14);
 
     --font-display: 'Tajawal', sans-serif;
     --font-body: 'IBM Plex Sans Arabic', 'Tajawal', sans-serif;
     --font-num: 'Space Grotesk', 'Tajawal', sans-serif;
 
-    --container: 1240px;
-    --r-sm: 8px;
-    --r-md: 14px;
-    --r-lg: 22px;
-    --r-xl: 32px;
+    --container: 1200px;
+    --r-sm: 10px;
+    --r-md: 16px;
+    --r-lg: 24px;
+    --r-xl: 34px;
 
-    --shadow-card: 0 10px 30px -12px rgba(10, 26, 53, 0.35);
-    --shadow-elev: 0 20px 50px -20px rgba(244, 123, 32, 0.35);
+    --shadow-card: 0 24px 60px -24px rgba(0, 0, 0, 0.6);
+    --shadow-glow: 0 20px 60px -18px rgba(255, 122, 26, 0.45);
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   [dir="ltr"] {
@@ -55,735 +66,606 @@
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
   body {
     font-family: var(--font-body);
-    background: var(--navy-900);
-    color: var(--ink-100);
-    line-height: 1.6;
+    background: var(--bg);
+    color: var(--white);
+    line-height: 1.65;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
+  ::selection { background: rgba(255,122,26,0.35); color: #fff; }
+  img { max-width: 100%; display: block; }
 
-  a:focus-visible, button:focus-visible, .btn:focus-visible {
-    outline: 2px solid var(--orange-400);
+  a:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--primary);
     outline-offset: 3px;
     border-radius: 6px;
   }
 
   .container { max-width: var(--container); margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- Typography helpers ---------- */
   .eyebrow {
     display: inline-flex; align-items: center; gap: 10px;
-    font-family: var(--font-display); font-weight: 500;
-    font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--orange-400);
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 12.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--primary-light);
   }
   .eyebrow::before {
-    content: ""; width: 28px; height: 2px; background: var(--orange-500);
+    content: ""; width: 26px; height: 1.5px;
+    background: linear-gradient(90deg, var(--primary), transparent);
   }
+  [dir="rtl"] .eyebrow::before {
+    background: linear-gradient(270deg, var(--primary), transparent);
+  }
+  .section-head { max-width: 640px; margin-bottom: 60px; }
+  .section-head.center { margin-inline: auto; text-align: center; }
+  .section-head.center .eyebrow { justify-content: center; }
   .h-section {
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: clamp(28px, 4vw, 44px);
-    line-height: 1.2;
+    font-size: clamp(30px, 4.4vw, 52px);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
     color: var(--white);
-    margin-top: 14px;
+    margin-top: 18px;
   }
-  .h-section .accent { color: var(--orange-400); }
+  .h-section .accent {
+    background: linear-gradient(120deg, var(--primary-light), var(--primary));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
   .sub-section {
-    color: var(--ink-300);
-    font-size: 16px;
-    max-width: 620px;
-    margin-top: 14px;
+    color: var(--muted);
+    font-size: 17px;
+    margin-top: 18px;
+    line-height: 1.7;
   }
 
+  /* ---------- Buttons ---------- */
   .btn {
     display: inline-flex; align-items: center; gap: 10px;
-    padding: 14px 26px;
-    border-radius: var(--r-md);
+    padding: 15px 28px;
+    border-radius: 999px;
     font-family: var(--font-display);
     font-weight: 700; font-size: 15px;
-    cursor: pointer;
-    border: none;
-    text-decoration: none;
-    transition: all 0.25s ease;
-    position: relative;
+    cursor: pointer; border: none; text-decoration: none;
+    transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease), background 0.3s var(--ease), color 0.3s var(--ease), border-color 0.3s var(--ease);
+    position: relative; white-space: nowrap;
   }
   .btn-primary {
-    background: var(--orange-500);
-    color: var(--white);
-    box-shadow: var(--shadow-elev);
+    background: linear-gradient(180deg, var(--primary-light), var(--primary));
+    color: #1a0a00;
+    box-shadow: var(--shadow-glow);
   }
-  .btn-primary:hover { background: var(--orange-400); transform: translateY(-2px); }
+  .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 26px 70px -16px rgba(255,122,26,0.6); }
   .btn-ghost {
-    background: transparent;
+    background: rgba(255,255,255,0.04);
     color: var(--white);
-    border: 1.5px solid rgba(255,255,255,0.2);
+    border: 1px solid var(--border-strong);
+    backdrop-filter: blur(8px);
   }
-  .btn-ghost:hover { border-color: var(--orange-400); color: var(--orange-400); }
-  .btn .arrow { transition: transform 0.25s; }
+  .btn-ghost:hover { border-color: var(--primary); color: var(--primary-light); transform: translateY(-3px); }
+  .btn .arrow { transition: transform 0.3s var(--ease); }
   [dir="rtl"] .btn .arrow { transform: scaleX(-1); }
   [dir="rtl"] .btn:hover .arrow { transform: scaleX(-1) translateX(4px); }
   [dir="ltr"] .btn:hover .arrow { transform: translateX(4px); }
 
+  /* ---------- Navbar ---------- */
   .nav-wrap {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    backdrop-filter: blur(14px);
-    background: rgba(10, 26, 53, 0.85);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    position: fixed; top: 0; inset-inline: 0; z-index: 200;
+    transition: background 0.4s var(--ease), backdrop-filter 0.4s var(--ease), border-color 0.4s var(--ease);
+    border-bottom: 1px solid transparent;
+  }
+  .nav-wrap.scrolled {
+    background: rgba(7, 17, 31, 0.72);
+    backdrop-filter: blur(18px) saturate(140%);
+    border-bottom: 1px solid var(--border);
   }
   nav {
-    max-width: var(--container);
-    margin: 0 auto;
-    padding: 16px 24px;
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 24px;
+    max-width: var(--container); margin: 0 auto;
+    padding: 18px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
   }
-  .brand {
-    display: flex; align-items: center; gap: 4px;
-    font-family: var(--font-display); font-weight: 900;
-    font-size: 28px; letter-spacing: -0.02em;
-    color: var(--white);
-    text-decoration: none;
-  }
-  .brand .x {
-    color: var(--orange-500);
-    display: inline-block;
-    transform: skewX(-8deg);
-  }
-  .brand-logo {
-    display: block;
-    height: 34px;
-    width: auto;
-  }
+  .brand { display: flex; align-items: center; text-decoration: none; }
+  .brand-logo { display: block; height: 34px; width: auto; }
   .footer-brand .brand-logo { height: 40px; }
-  .nav-links {
-    display: flex; align-items: center; gap: 30px;
-    list-style: none;
+  .nav-links { display: flex; align-items: center; gap: 6px; list-style: none; }
+  .nav-links > li { position: relative; }
+  .nav-links > li > a {
+    color: rgba(255,255,255,0.82); text-decoration: none;
+    font-size: 14.5px; font-weight: 500; white-space: nowrap;
+    padding: 10px 12px; border-radius: 10px;
+    transition: color 0.2s, background 0.2s;
+    display: inline-flex; align-items: center; gap: 6px;
   }
-  .nav-links a {
-    color: var(--ink-200);
-    text-decoration: none;
-    font-size: 14px; font-weight: 500;
-    transition: color 0.2s;
-    position: relative;
-  }
-  .nav-links a:hover { color: var(--orange-400); }
-  .nav-links a.active { color: var(--orange-400); }
-  .nav-links a.active::after {
-    content: ""; position: absolute; right: 0; left: 0; bottom: -8px;
-    height: 2px; background: var(--orange-500);
-  }
-  .nav-cta {
-    display: flex; align-items: center; gap: 12px;
-  }
-  .auth-link {
-    color: var(--ink-200);
-    text-decoration: none;
-    font-size: 14px; font-weight: 600;
-    padding: 8px 14px;
-    border-radius: var(--r-sm);
-    transition: color 0.2s;
-  }
-  .auth-link:hover { color: var(--orange-400); }
-  .lang-btn {
-    background: rgba(255,255,255,0.06);
-    color: var(--white);
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 8px 14px;
-    border-radius: var(--r-sm);
-    font-size: 13px; font-weight: 600;
-    cursor: pointer;
-    display: flex; align-items: center; gap: 6px;
-    text-decoration: none;
-    font-family: var(--font-display);
-    transition: all 0.2s;
-  }
-  .lang-btn:hover {
-    background: rgba(244,123,32,0.15);
-    color: var(--orange-400);
-    border-color: rgba(244,123,32,0.3);
-  }
-  .nav-cta .btn { padding: 11px 20px; font-size: 14px; }
-  .menu-toggle { display: none; background: none; border: none; color: white; cursor: pointer; }
+  .nav-links > li > a:hover { color: var(--white); background: rgba(255,255,255,0.05); }
+  .nav-links > li > a.active { color: var(--primary-light); }
+  .nav-links .chev { transition: transform 0.3s var(--ease); opacity: 0.6; }
+  .has-mega:hover .chev { transform: rotate(180deg); }
 
-  .hero {
-    position: relative;
-    padding: 150px 0 80px;
-    overflow: hidden;
-    background:
-      radial-gradient(circle at 85% 30%, rgba(244, 123, 32, 0.18), transparent 50%),
-      radial-gradient(circle at 15% 70%, rgba(30, 61, 114, 0.4), transparent 55%),
-      var(--navy-900);
-  }
-  .hero::before {
-    content: "";
-    position: absolute; inset: 0;
-    background-image:
-      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-    background-size: 60px 60px;
-    mask-image: radial-gradient(ellipse 80% 60% at center, black, transparent 70%);
-    -webkit-mask-image: radial-gradient(ellipse 80% 60% at center, black, transparent 70%);
-    pointer-events: none;
-  }
-  .hero-grid {
-    display: grid;
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: 60px;
-    align-items: center;
-    position: relative;
-    z-index: 2;
-  }
-  .hero-copy h1 {
-    font-family: var(--font-display);
-    font-size: clamp(38px, 5.5vw, 68px);
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    color: var(--white);
-    margin: 18px 0 22px;
-  }
-  .hero-copy h1 .accent {
-    color: var(--orange-400);
-    position: relative;
-    display: inline-block;
-  }
-  .hero-copy h1 .accent::after {
-    content: "";
-    position: absolute;
-    right: 0; left: 0; bottom: 4px;
-    height: 8px;
-    background: rgba(244, 123, 32, 0.2);
-    z-index: -1;
-  }
-  .hero-copy p {
-    font-size: 18px;
-    color: var(--ink-300);
-    max-width: 540px;
-    margin-bottom: 36px;
-  }
-  .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 40px; }
-  .hero-trust {
-    display: flex; align-items: center; gap: 14px;
-    color: var(--ink-400); font-size: 13px;
-  }
-  .avatars { display: flex; }
-  .avatar {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--orange-400), var(--orange-500));
-    border: 2px solid var(--navy-900);
-    margin-inline-start: -10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; color: white;
-    font-family: var(--font-num);
-  }
-  .avatar:first-child { margin-inline-start: 0; }
-  .avatar:nth-child(2) { background: linear-gradient(135deg, #4A90E2, #357ABD); }
-  .avatar:nth-child(3) { background: linear-gradient(135deg, #50C9B5, #2E9D8C); }
-  .avatar:nth-child(4) { background: linear-gradient(135deg, #B968D9, #8E44AD); }
-
-  .hero-visual {
-    position: relative;
-    height: 520px;
-  }
-  .x-chevron {
-    position: absolute;
-    inset: 0;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .chevron-shape {
-    width: 100%; height: 100%;
-    position: relative;
-  }
-  .chevron-shape svg { width: 100%; height: 100%; }
-  .floating-card {
-    position: absolute;
-    background: rgba(15, 37, 72, 0.85);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: var(--r-md);
-    padding: 14px 18px;
-    display: flex; align-items: center; gap: 12px;
-    box-shadow: var(--shadow-card);
-    z-index: 3;
-  }
-  .floating-card.fc-1 { top: 60px; inset-inline-end: -10px; }
-  .floating-card.fc-2 { bottom: 80px; inset-inline-start: -20px; }
-  .fc-icon {
-    width: 38px; height: 38px;
-    border-radius: 10px;
-    background: rgba(244, 123, 32, 0.15);
-    color: var(--orange-400);
-    display: grid; place-items: center;
-  }
-  .fc-meta { display: flex; flex-direction: column; }
-  .fc-label { font-size: 11px; color: var(--ink-400); }
-  .fc-value { font-family: var(--font-num); font-weight: 700; font-size: 16px; color: var(--white); }
-
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.4); }
-  }
-  .pulse-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #4ADE80;
-    animation: pulse-dot 1.8s ease-in-out infinite;
-  }
-
-  .stats {
-    background: var(--navy-800);
-    border-top: 1px solid rgba(255,255,255,0.05);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    padding: 36px 0;
-    position: relative;
-  }
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 24px;
-  }
-  .stat {
-    text-align: center;
-    padding: 0 16px;
-    border-inline-start: 1px solid rgba(255,255,255,0.08);
-  }
-  .stat:first-child { border-inline-start: none; }
-  .stat-icon {
-    width: 48px; height: 48px;
-    border-radius: 12px;
-    background: rgba(244,123,32,0.12);
-    color: var(--orange-400);
-    display: grid; place-items: center;
-    margin: 0 auto 12px;
-  }
-  .stat-value {
-    font-family: var(--font-num);
-    font-weight: 700; font-size: 28px;
-    color: var(--white);
-    line-height: 1;
-  }
-  .stat-label {
-    color: var(--ink-300);
-    font-size: 13px;
-    margin-top: 6px;
-  }
-
-  .services { padding: 100px 0; background: var(--navy-900); }
-  .section-head { text-align: center; margin-bottom: 60px; }
-  .section-head .eyebrow { display: inline-flex; justify-content: center; }
-  .section-head .sub-section { margin: 14px auto 0; }
-  .services-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 20px;
-  }
-  .service-card {
-    background: linear-gradient(180deg, var(--navy-800), var(--navy-700));
-    border: 1px solid rgba(255,255,255,0.06);
+  /* Mega menu */
+  .mega {
+    position: absolute; top: calc(100% + 10px);
+    inset-inline-start: 50%; transform: translateX(-50%) translateY(10px);
+    width: 620px; max-width: 90vw;
+    background: rgba(17, 28, 46, 0.96);
+    backdrop-filter: blur(24px);
+    border: 1px solid var(--border-strong);
     border-radius: var(--r-lg);
-    padding: 30px 24px;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.35s ease;
-    cursor: pointer;
+    padding: 14px;
+    box-shadow: var(--shadow-card);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity 0.3s var(--ease), transform 0.3s var(--ease), visibility 0.3s;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
   }
-  .service-card::before {
-    content: "";
-    position: absolute;
-    top: 0; inset-inline-end: 0;
-    width: 60px; height: 4px;
-    background: var(--orange-500);
-    transform: translateX(100%);
-    transition: transform 0.35s ease;
+  [dir="rtl"] .mega { transform: translateX(50%) translateY(10px); }
+  .has-mega:hover .mega {
+    opacity: 1; visibility: visible; pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
   }
-  [dir="rtl"] .service-card::before { transform: translateX(-100%); }
-  .service-card:hover {
-    transform: translateY(-6px);
-    border-color: rgba(244,123,32,0.3);
+  [dir="rtl"] .has-mega:hover .mega { transform: translateX(50%) translateY(0); }
+  .mega-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 12px; border-radius: var(--r-sm);
+    text-decoration: none; transition: background 0.2s;
   }
-  .service-card:hover::before { transform: translateX(0); }
-  .service-icon {
-    width: 56px; height: 56px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, rgba(244,123,32,0.25), rgba(244,123,32,0.08));
-    color: var(--orange-400);
+  .mega-item:hover { background: rgba(255,255,255,0.05); }
+  .mega-ico {
+    width: 38px; height: 38px; flex-shrink: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(255,122,26,0.22), rgba(255,122,26,0.06));
+    color: var(--primary-light);
     display: grid; place-items: center;
-    margin-bottom: 20px;
+    border: 1px solid rgba(255,122,26,0.18);
   }
-  .service-card h3 {
+  .mega-item h6 { font-size: 14px; color: var(--white); font-weight: 700; margin-bottom: 2px; font-family: var(--font-display); }
+  .mega-item span { font-size: 12.5px; color: var(--muted); }
+
+  .nav-cta { display: flex; align-items: center; gap: 10px; }
+  .auth-link {
+    color: rgba(255,255,255,0.82); text-decoration: none; white-space: nowrap;
+    font-size: 14px; font-weight: 600; padding: 8px 12px;
+    border-radius: 10px; transition: color 0.2s, background 0.2s;
+  }
+  .auth-link:hover { color: var(--white); background: rgba(255,255,255,0.05); }
+  .lang-btn {
+    background: rgba(255,255,255,0.05); color: var(--white);
+    border: 1px solid var(--border); padding: 9px 14px;
+    border-radius: 999px; font-size: 13px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 7px;
+    text-decoration: none; font-family: var(--font-display);
+    transition: all 0.25s var(--ease);
+  }
+  .lang-btn:hover { background: rgba(255,122,26,0.14); color: var(--primary-light); border-color: rgba(255,122,26,0.35); }
+  .nav-cta .btn { padding: 11px 20px; font-size: 14px; }
+  .menu-toggle { display: none; background: none; border: none; color: white; cursor: pointer; padding: 6px; }
+
+  /* Mobile drawer */
+  .drawer {
+    position: fixed; inset: 0; z-index: 300;
+    background: rgba(7,17,31,0.98); backdrop-filter: blur(20px);
+    padding: 90px 28px 40px;
+    transform: translateX(100%); transition: transform 0.4s var(--ease);
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  [dir="rtl"] .drawer { transform: translateX(-100%); }
+  .drawer.open { transform: translateX(0); }
+  .drawer a {
+    color: var(--white); text-decoration: none; font-size: 20px;
+    font-weight: 600; font-family: var(--font-display);
+    padding: 14px 0; border-bottom: 1px solid var(--border);
+  }
+  .drawer .drawer-cta { margin-top: 24px; border: none; padding: 0; }
+  .drawer-close { position: absolute; top: 26px; inset-inline-end: 24px; background: none; border: none; color: white; cursor: pointer; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative; min-height: 100svh;
+    display: flex; align-items: center;
+    padding: 140px 0 90px; overflow: hidden;
+  }
+  .hero-bg { position: absolute; inset: 0; z-index: 0; }
+  .hero-bg img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+  .hero-bg::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      linear-gradient(180deg, rgba(7,17,31,0.72) 0%, rgba(7,17,31,0.5) 40%, rgba(7,17,31,0.85) 100%),
+      linear-gradient(to var(--fade-dir, right), rgba(7,17,31,0.94) 0%, rgba(7,17,31,0.7) 45%, rgba(7,17,31,0.25) 100%);
+  }
+  [dir="ltr"] { --fade-dir: right; }
+  [dir="rtl"] { --fade-dir: left; }
+  /* Remotion live-motion overlay — sits above the photo, below hero content. */
+  .hero-motion { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+  .cta-motion { position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: inherit; overflow: hidden; }
+  .hero-glow {
+    position: absolute; z-index: 1; pointer-events: none;
+    width: 620px; height: 620px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,122,26,0.16), transparent 65%);
+    top: -140px; inset-inline-end: -120px; filter: blur(20px);
+  }
+  .hero .container { position: relative; z-index: 3; width: 100%; }
+  .hero-inner { max-width: 720px; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border-strong);
+    padding: 7px 14px 7px 10px; border-radius: 999px;
+    font-size: 13px; color: rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px); margin-bottom: 24px;
+  }
+  .hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #4ADE80; box-shadow: 0 0 0 4px rgba(74,222,128,0.18); }
+  .hero h1 {
     font-family: var(--font-display);
-    font-weight: 700; font-size: 18px;
-    color: var(--white);
-    margin-bottom: 10px;
+    font-size: clamp(40px, 6.4vw, 82px);
+    font-weight: 800; line-height: 1.02;
+    letter-spacing: -0.03em; color: var(--white);
+    margin-bottom: 26px;
   }
-  .service-card p { color: var(--ink-300); font-size: 14px; line-height: 1.6; }
-  .service-card .more {
-    margin-top: 18px;
-    color: var(--orange-400);
-    font-size: 13px; font-weight: 600;
-    display: flex; align-items: center; gap: 6px;
+  .hero h1 .accent {
+    background: linear-gradient(120deg, var(--primary-light) 10%, var(--primary) 60%, var(--primary-deep));
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
   }
+  .hero p {
+    font-size: clamp(17px, 1.6vw, 20px);
+    color: rgba(255,255,255,0.82);
+    max-width: 560px; margin-bottom: 38px; line-height: 1.7;
+  }
+  .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
+
+  .hero-kpis {
+    position: absolute; z-index: 3; bottom: 46px; inset-inline-end: 24px;
+    display: flex; flex-direction: column; gap: 14px; width: 260px;
+  }
+  .kpi-card {
+    background: rgba(17, 28, 46, 0.55);
+    backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-md); padding: 16px 18px;
+    display: flex; align-items: center; gap: 14px;
+    box-shadow: var(--shadow-card);
+  }
+  .kpi-ico {
+    width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+    background: linear-gradient(135deg, rgba(255,122,26,0.28), rgba(255,122,26,0.08));
+    color: var(--primary-light); display: grid; place-items: center;
+    border: 1px solid rgba(255,122,26,0.2);
+  }
+  .kpi-meta { display: flex; flex-direction: column; }
+  .kpi-value { font-family: var(--font-num); font-weight: 700; font-size: 22px; color: var(--white); line-height: 1.1; }
+  .kpi-label { font-size: 12px; color: var(--muted); }
+  .kpi-card.k1 { animation: float 5s var(--ease) infinite; }
+  .kpi-card.k2 { animation: float 5s var(--ease) infinite 1.6s; }
+  .kpi-card.k3 { animation: float 5s var(--ease) infinite 3.2s; }
+
+  .scroll-hint {
+    position: absolute; z-index: 3; bottom: 30px; inset-inline-start: 24px;
+    display: flex; align-items: center; gap: 10px;
+    color: var(--muted); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .scroll-mouse {
+    width: 22px; height: 34px; border: 1.5px solid var(--border-strong);
+    border-radius: 12px; position: relative;
+  }
+  .scroll-mouse::after {
+    content: ""; position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+    width: 3px; height: 7px; border-radius: 3px; background: var(--primary-light);
+    animation: scroll-dot 1.8s var(--ease) infinite;
+  }
+  @keyframes scroll-dot { 0% { opacity: 0; top: 6px; } 40% { opacity: 1; } 80% { opacity: 0; top: 16px; } 100% { opacity: 0; } }
+
+  /* ---------- Marquee / Trusted ---------- */
+  .trusted { padding: 46px 0; border-block: 1px solid var(--border); background: var(--secondary); }
+  .trusted-title { text-align: center; color: var(--muted); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 30px; }
+  .marquee { position: relative; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+  .marquee-track { display: flex; gap: 64px; width: max-content; animation: marquee 34s linear infinite; }
+  [dir="rtl"] .marquee-track { animation-direction: reverse; }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+  .marquee-logo {
+    font-family: var(--font-display); font-weight: 700; font-size: 26px;
+    color: rgba(255,255,255,0.5); letter-spacing: 0.01em; white-space: nowrap;
+    transition: color 0.25s; flex-shrink: 0;
+  }
+  .marquee-logo:hover { color: var(--white); }
+  @keyframes marquee { to { transform: translateX(-50%); } }
+
+  /* ---------- Stats ---------- */
+  .stats { padding: 110px 0; background: var(--bg); position: relative; }
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    margin-top: 56px; border: 1px solid var(--border); border-radius: var(--r-lg);
+    overflow: hidden; background: var(--surface);
+  }
+  .stat { padding: 38px 26px; border-inline-start: 1px solid var(--border); position: relative; }
+  .stat:first-child { border-inline-start: none; }
+  .stat-value { font-family: var(--font-num); font-weight: 700; font-size: clamp(32px, 3.4vw, 46px); color: var(--white); line-height: 1; letter-spacing: -0.02em; }
+  .stat-value .u { color: var(--primary); }
+  .stat-label { color: var(--muted); font-size: 14px; margin-top: 10px; }
+
+  /* ---------- Services ---------- */
+  .services { padding: 120px 0; background: linear-gradient(180deg, var(--bg), var(--secondary)); }
+  .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .service-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg); padding: 32px 28px;
+    position: relative; overflow: hidden;
+    transition: transform 0.4s var(--ease), border-color 0.4s var(--ease), background 0.4s var(--ease);
+  }
+  .service-card::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 0%), rgba(255,122,26,0.12), transparent 60%);
+    opacity: 0; transition: opacity 0.4s var(--ease);
+  }
+  .service-card:hover { transform: translateY(-8px); border-color: rgba(255,122,26,0.35); background: var(--surface-2); }
+  .service-card:hover::after { opacity: 1; }
+  .service-icon {
+    width: 60px; height: 60px; border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255,122,26,0.25), rgba(255,122,26,0.06));
+    color: var(--primary-light); display: grid; place-items: center;
+    margin-bottom: 22px; border: 1px solid rgba(255,122,26,0.18);
+    transition: transform 0.4s var(--ease);
+  }
+  .service-card:hover .service-icon { transform: scale(1.08) rotate(-4deg); }
+  .service-card h3 { font-family: var(--font-display); font-weight: 700; font-size: 20px; color: var(--white); margin-bottom: 10px; }
+  .service-card p { color: var(--muted); font-size: 14.5px; line-height: 1.65; }
+  .service-card .more { margin-top: 20px; color: var(--primary-light); font-size: 13.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 7px; }
   [dir="rtl"] .more svg { transform: scaleX(-1); }
 
-  .how-section {
-    padding: 100px 0;
-    background:
-      linear-gradient(180deg, var(--navy-900) 0%, var(--navy-800) 100%);
-    position: relative;
-    overflow: hidden;
+  /* ---------- Why (comparison) ---------- */
+  .why { padding: 120px 0; background: var(--secondary); }
+  .why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+  .why-features { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 36px; }
+  .why-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 22px; transition: border-color 0.3s, transform 0.3s var(--ease); }
+  .why-item:hover { border-color: rgba(255,122,26,0.3); transform: translateY(-4px); }
+  .why-item-icon { width: 42px; height: 42px; border-radius: 12px; background: rgba(255,122,26,0.14); color: var(--primary-light); display: grid; place-items: center; margin-bottom: 14px; }
+  .why-item h4 { font-family: var(--font-display); font-weight: 700; font-size: 16px; color: var(--white); margin-bottom: 7px; }
+  .why-item p { color: var(--muted); font-size: 13.5px; }
+
+  .compare {
+    background: linear-gradient(160deg, var(--surface-2), var(--surface));
+    border: 1px solid var(--border-strong); border-radius: var(--r-xl);
+    padding: 8px; box-shadow: var(--shadow-card); position: relative; overflow: hidden;
   }
-  .how-section::before {
-    content: "";
-    position: absolute;
-    top: -100px; inset-inline-start: -100px;
-    width: 400px; height: 400px;
-    background: radial-gradient(circle, rgba(244,123,32,0.08), transparent 70%);
-    pointer-events: none;
+  .compare::before {
+    content: ""; position: absolute; top: -80px; inset-inline-end: -80px;
+    width: 260px; height: 260px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,122,26,0.16), transparent 70%);
   }
-  .how-flow {
-    margin-top: 60px;
-    position: relative;
-    background: rgba(10, 26, 53, 0.6);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: var(--r-xl);
-    padding: 50px 30px;
-  }
-  .flow-steps {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 30px;
-    position: relative;
-  }
-  .flow-line {
-    position: absolute;
-    top: 36px;
-    right: 12.5%;
-    left: 12.5%;
-    height: 2px;
-    background: repeating-linear-gradient(90deg, var(--orange-500) 0 8px, transparent 8px 16px);
-    z-index: 1;
-  }
-  .flow-step {
-    position: relative;
-    text-align: center;
-    z-index: 2;
-  }
+  .compare-head { display: grid; grid-template-columns: 1.4fr 1fr 1fr; padding: 20px 22px 14px; position: relative; }
+  .compare-head .ch-title { font-family: var(--font-display); font-weight: 700; color: var(--white); font-size: 15px; align-self: center; }
+  .compare-head .ch { text-align: center; font-family: var(--font-display); font-weight: 700; font-size: 14px; }
+  .compare-head .ch.navix { color: var(--primary-light); }
+  .compare-head .ch.legacy { color: var(--muted); }
+  .compare-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr; align-items: center; padding: 16px 22px; border-top: 1px solid var(--border); }
+  .compare-row span { color: rgba(255,255,255,0.9); font-size: 14px; }
+  .compare-row .cell { display: grid; place-items: center; }
+  .ok { color: #4ADE80; } .no { color: var(--muted-2); }
+
+  /* ---------- How ---------- */
+  .how { padding: 120px 0; background: var(--bg); position: relative; overflow: hidden; }
+  .how-glow { position: absolute; top: 10%; inset-inline-start: -120px; width: 400px; height: 400px; border-radius: 50%; background: radial-gradient(circle, rgba(255,122,26,0.08), transparent 70%); pointer-events: none; }
+  .flow-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; position: relative; margin-top: 20px; }
+  .flow-line { position: absolute; top: 34px; inset-inline: 12%; height: 2px; background: repeating-linear-gradient(90deg, rgba(255,122,26,0.6) 0 10px, transparent 10px 20px); }
+  .flow-step { position: relative; z-index: 2; }
   .step-num {
-    width: 72px; height: 72px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--orange-500), var(--orange-400));
-    color: var(--white);
-    font-family: var(--font-num);
-    font-weight: 700; font-size: 28px;
-    display: grid; place-items: center;
-    margin: 0 auto 18px;
-    box-shadow: 0 8px 24px -8px rgba(244,123,32,0.5);
-    border: 4px solid var(--navy-800);
+    width: 68px; height: 68px; border-radius: 20px;
+    background: linear-gradient(160deg, var(--surface-2), var(--surface));
+    border: 1px solid var(--border-strong);
+    color: var(--primary-light); font-family: var(--font-num);
+    font-weight: 700; font-size: 24px; display: grid; place-items: center;
+    margin-bottom: 22px; box-shadow: var(--shadow-card); position: relative;
   }
-  .step-icon {
-    color: var(--orange-400);
-    margin-bottom: 8px;
-    display: inline-block;
-  }
-  .flow-step h4 {
-    font-family: var(--font-display);
-    font-weight: 700; font-size: 17px;
-    color: var(--white);
-    margin-bottom: 6px;
-  }
-  .flow-step p { color: var(--ink-300); font-size: 13px; }
+  .step-num .step-ico { position: absolute; bottom: -10px; inset-inline-end: -10px; width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(180deg, var(--primary-light), var(--primary)); color: #1a0a00; display: grid; place-items: center; box-shadow: var(--shadow-glow); }
+  .flow-step h4 { font-family: var(--font-display); font-weight: 700; font-size: 19px; color: var(--white); margin-bottom: 8px; }
+  .flow-step p { color: var(--muted); font-size: 14px; }
 
-  .why { padding: 100px 0; background: var(--navy-900); }
-  .why-grid {
-    display: grid;
-    grid-template-columns: 1.1fr 1fr;
-    gap: 60px;
-    align-items: center;
+  /* ---------- Tech ---------- */
+  .tech { padding: 120px 0; background: linear-gradient(180deg, var(--bg), var(--secondary)); }
+  .tech-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .tech-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-lg); padding: 30px 26px;
+    transition: transform 0.4s var(--ease), border-color 0.4s var(--ease);
+    position: relative; overflow: hidden;
   }
-  .why-features {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    margin-top: 36px;
-  }
-  .why-item {
-    background: rgba(15, 37, 72, 0.5);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: var(--r-md);
-    padding: 20px;
-  }
-  .why-item-icon {
-    width: 38px; height: 38px;
-    border-radius: 10px;
-    background: rgba(244,123,32,0.15);
-    color: var(--orange-400);
-    display: grid; place-items: center;
-    margin-bottom: 12px;
-  }
-  .why-item h4 {
-    font-family: var(--font-display);
-    font-weight: 700; font-size: 15px;
-    color: var(--white);
-    margin-bottom: 6px;
-  }
-  .why-item p { color: var(--ink-300); font-size: 13px; }
+  .tech-card:hover { transform: translateY(-6px); border-color: var(--border-strong); }
+  .tech-ico { width: 52px; height: 52px; border-radius: 14px; background: rgba(255,122,26,0.12); border: 1px solid rgba(255,122,26,0.18); color: var(--primary-light); display: grid; place-items: center; margin-bottom: 20px; }
+  .tech-card h4 { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--white); margin-bottom: 8px; }
+  .tech-card p { color: var(--muted); font-size: 13.5px; }
 
-  .why-visual {
-    position: relative;
-    background: linear-gradient(135deg, var(--navy-700), var(--navy-800));
-    border-radius: var(--r-xl);
-    padding: 40px;
-    overflow: hidden;
-    aspect-ratio: 4/5;
+  /* ---------- Integrations ---------- */
+  .integrations { padding: 120px 0; background: var(--secondary); }
+  .int-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 16px; margin-bottom: 40px; }
+  .int-cell {
+    aspect-ratio: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-md); display: grid; place-items: center;
+    color: rgba(255,255,255,0.7); font-family: var(--font-display); font-weight: 700;
+    font-size: 14px; text-align: center; padding: 12px;
+    transition: transform 0.35s var(--ease), border-color 0.35s var(--ease), color 0.35s, background 0.35s;
   }
-  .why-visual::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(circle at 30% 20%, rgba(244,123,32,0.2), transparent 50%),
-      radial-gradient(circle at 70% 80%, rgba(30,61,114,0.5), transparent 50%);
-  }
-  .why-badge {
-    position: absolute;
-    background: rgba(10, 26, 53, 0.85);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: var(--r-md);
-    padding: 16px;
-    box-shadow: var(--shadow-card);
-  }
-  .why-badge.wb-1 { top: 40px; inset-inline-end: 40px; min-width: 180px; }
-  .why-badge.wb-2 { bottom: 80px; inset-inline-start: 40px; min-width: 200px; }
-  .why-badge.wb-3 { top: 50%; inset-inline-end: 30%; transform: translateY(-50%); min-width: 160px; }
-  .wb-title { font-size: 12px; color: var(--ink-400); margin-bottom: 4px; }
-  .wb-val { font-family: var(--font-num); font-weight: 700; color: var(--white); font-size: 18px; }
-  .wb-progress {
-    height: 4px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 4px;
-    margin-top: 10px;
-    overflow: hidden;
-  }
-  .wb-bar { height: 100%; background: var(--orange-500); border-radius: 4px; }
+  .int-cell:hover { transform: translateY(-6px) scale(1.03); border-color: rgba(255,122,26,0.35); color: var(--white); background: var(--surface-2); }
+  .int-center { text-align: center; }
+  .int-link { color: var(--primary-light); text-decoration: none; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; }
+  [dir="rtl"] .int-link svg { transform: scaleX(-1); }
 
-  .partners {
-    padding: 70px 0;
-    background: var(--navy-800);
-    border-top: 1px solid rgba(255,255,255,0.05);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-  }
-  .partners-title {
-    text-align: center;
-    color: var(--ink-400);
-    font-size: 14px; font-weight: 500;
-    letter-spacing: 0.06em;
-    margin-bottom: 36px;
-  }
-  .partners-logos {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 30px;
-    align-items: center;
-  }
-  .partner-logo {
-    font-family: var(--font-display);
-    font-weight: 700;
-    color: var(--ink-300);
-    text-align: center;
-    font-size: 18px;
-    opacity: 0.6;
-    transition: opacity 0.2s;
-    letter-spacing: 0.02em;
-  }
-  .partner-logo:hover { opacity: 1; color: var(--white); }
+  /* ---------- Testimonials ---------- */
+  .testimonials { padding: 120px 0; background: var(--bg); }
+  .t-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .t-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 32px 28px; display: flex; flex-direction: column; transition: transform 0.4s var(--ease), border-color 0.4s; }
+  .t-card:hover { transform: translateY(-6px); border-color: var(--border-strong); }
+  .t-stars { display: flex; gap: 3px; margin-bottom: 18px; color: var(--primary); }
+  .t-quote { color: rgba(255,255,255,0.9); font-size: 15.5px; line-height: 1.7; flex: 1; }
+  .t-author { display: flex; align-items: center; gap: 13px; margin-top: 24px; padding-top: 22px; border-top: 1px solid var(--border); }
+  .t-avatar { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-num); font-weight: 700; color: #1a0a00; font-size: 15px; }
+  .t-name { font-family: var(--font-display); font-weight: 700; color: var(--white); font-size: 15px; }
+  .t-role { color: var(--muted); font-size: 13px; }
 
-  .cta-banner {
-    padding: 90px 0;
-    background: var(--navy-900);
-    position: relative;
+  /* ---------- Case studies ---------- */
+  .cases { padding: 120px 0; background: linear-gradient(180deg, var(--bg), var(--secondary)); }
+  .cases-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .case-card {
+    background: linear-gradient(165deg, var(--surface-2), var(--surface));
+    border: 1px solid var(--border); border-radius: var(--r-lg);
+    padding: 34px 30px; position: relative; overflow: hidden;
+    transition: transform 0.4s var(--ease), border-color 0.4s;
   }
+  .case-card:hover { transform: translateY(-8px); border-color: rgba(255,122,26,0.3); }
+  .case-metric { font-family: var(--font-num); font-weight: 700; font-size: clamp(40px, 5vw, 58px); line-height: 1; background: linear-gradient(120deg, var(--primary-light), var(--primary)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.02em; }
+  .case-label { font-family: var(--font-display); font-weight: 700; color: var(--white); font-size: 17px; margin: 14px 0 10px; }
+  .case-card p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+  .case-read { margin-top: 22px; color: var(--primary-light); font-size: 13.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 7px; text-decoration: none; }
+  [dir="rtl"] .case-read svg { transform: scaleX(-1); }
+
+  /* ---------- CTA ---------- */
+  .cta-banner { padding: 40px 0 120px; background: var(--secondary); }
   .cta-box {
-    background:
-      linear-gradient(135deg, var(--orange-500) 0%, #D8651A 100%);
-    border-radius: var(--r-xl);
-    padding: 60px 50px;
-    position: relative;
-    overflow: hidden;
-    display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    gap: 40px;
-    align-items: center;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
+    border-radius: var(--r-xl); padding: 70px 60px; position: relative; overflow: hidden;
+    display: grid; grid-template-columns: 1.6fr 1fr; gap: 40px; align-items: center;
   }
-  .cta-box::before {
-    content: "";
-    position: absolute;
-    top: -50%; inset-inline-start: -10%;
-    width: 60%; height: 200%;
-    background: rgba(255,255,255,0.05);
-    transform: rotate(20deg);
-    pointer-events: none;
-  }
-  .cta-box::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image:
-      radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-    background-size: 24px 24px;
-    opacity: 0.4;
-    pointer-events: none;
-  }
-  .cta-box h2 {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: clamp(26px, 3.5vw, 38px);
-    color: var(--white);
-    line-height: 1.2;
-    position: relative;
-    z-index: 2;
-  }
-  .cta-box p { color: rgba(255,255,255,0.9); margin-top: 12px; position: relative; z-index: 2; }
+  .cta-box::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.14) 1px, transparent 1px); background-size: 22px 22px; opacity: 0.5; }
+  .cta-box::after { content: ""; position: absolute; top: -60%; inset-inline-start: -10%; width: 55%; height: 220%; background: rgba(255,255,255,0.08); transform: rotate(18deg); pointer-events: none; }
+  .cta-box .eyebrow { color: rgba(26,10,0,0.75); }
+  .cta-box .eyebrow::before { background: rgba(26,10,0,0.5); }
+  .cta-box h2 { font-family: var(--font-display); font-weight: 800; font-size: clamp(30px, 4vw, 46px); color: #1a0a00; line-height: 1.08; letter-spacing: -0.02em; position: relative; z-index: 2; margin-top: 14px; }
+  .cta-box p { color: rgba(26,10,0,0.82); margin-top: 14px; position: relative; z-index: 2; font-size: 16px; max-width: 520px; }
   .cta-actions { display: flex; gap: 12px; flex-wrap: wrap; position: relative; z-index: 2; justify-content: flex-end; }
-  .cta-actions .btn-primary { background: var(--white); color: var(--navy-900); }
-  .cta-actions .btn-primary:hover { background: var(--navy-900); color: var(--white); }
-  .cta-actions .btn-ghost { color: var(--white); border-color: rgba(255,255,255,0.4); }
-  .cta-actions .btn-ghost:hover { background: rgba(255,255,255,0.1); border-color: var(--white); }
+  .cta-actions .btn-primary { background: #0a0f18; color: var(--white); box-shadow: 0 20px 50px -20px rgba(0,0,0,0.6); }
+  .cta-actions .btn-primary:hover { background: #000; }
+  .cta-actions .btn-ghost { color: #1a0a00; border-color: rgba(26,10,0,0.35); background: rgba(255,255,255,0.14); }
+  .cta-actions .btn-ghost:hover { background: rgba(255,255,255,0.28); border-color: #1a0a00; color: #1a0a00; }
 
-  footer {
-    background: var(--navy-900);
-    padding: 80px 0 30px;
-    border-top: 1px solid rgba(255,255,255,0.06);
-  }
-  .footer-grid {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
-    gap: 40px;
-    margin-bottom: 50px;
-  }
-  .footer-brand { max-width: 320px; }
-  .footer-brand p {
-    color: var(--ink-300);
-    font-size: 14px;
-    margin: 18px 0 24px;
-  }
+  /* ---------- Footer ---------- */
+  footer { background: var(--bg); padding: 90px 0 34px; border-top: 1px solid var(--border); }
+  .footer-top { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 44px; margin-bottom: 56px; }
+  .footer-brand { max-width: 340px; }
+  .footer-brand p { color: var(--muted); font-size: 14px; margin: 20px 0 24px; line-height: 1.7; }
   .socials { display: flex; gap: 10px; }
-  .social-icon {
-    width: 38px; height: 38px;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.06);
-    color: var(--ink-200);
-    display: grid; place-items: center;
-    transition: all 0.2s;
-    cursor: pointer;
-  }
-  .social-icon:hover {
-    background: var(--orange-500);
-    color: var(--white);
-  }
-  .footer-col h5 {
-    font-family: var(--font-display);
-    font-weight: 700; font-size: 15px;
-    color: var(--white);
-    margin-bottom: 20px;
-  }
+  .social-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: rgba(255,255,255,0.8); display: grid; place-items: center; transition: all 0.25s var(--ease); }
+  .social-icon:hover { background: var(--primary); border-color: var(--primary); color: #1a0a00; transform: translateY(-3px); }
+  .footer-col h5 { font-family: var(--font-display); font-weight: 700; font-size: 14px; color: var(--white); margin-bottom: 20px; letter-spacing: 0.02em; }
   .footer-col ul { list-style: none; }
-  .footer-col li { margin-bottom: 12px; }
-  .footer-col a {
-    color: var(--ink-300);
-    text-decoration: none;
-    font-size: 14px;
-    transition: color 0.2s;
-  }
-  .footer-col a:hover { color: var(--orange-400); }
-  .contact-li { display: flex; align-items: flex-start; gap: 10px; color: var(--ink-300); font-size: 13px; }
-  .contact-li svg { color: var(--orange-400); flex-shrink: 0; margin-top: 2px; }
+  .footer-col li { margin-bottom: 13px; }
+  .footer-col a { color: var(--muted); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--primary-light); }
 
-  .footer-bottom {
-    border-top: 1px solid rgba(255,255,255,0.06);
-    padding-top: 24px;
-    display: flex; justify-content: space-between; align-items: center;
-    color: var(--ink-400); font-size: 13px;
+  .footer-news { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 34px 0; margin-bottom: 34px; display: grid; grid-template-columns: 1fr auto; gap: 30px; align-items: center; }
+  .footer-news h4 { font-family: var(--font-display); font-weight: 700; font-size: 20px; color: var(--white); }
+  .footer-news p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .news-form { display: flex; gap: 10px; }
+  .news-form input {
+    background: var(--surface); border: 1px solid var(--border-strong); border-radius: 999px;
+    padding: 13px 20px; color: var(--white); font-size: 14px; font-family: var(--font-body);
+    min-width: 260px; outline: none; transition: border-color 0.2s;
   }
+  .news-form input::placeholder { color: var(--muted-2); }
+  .news-form input:focus { border-color: var(--primary); }
+
+  .footer-bottom { border-top: 1px solid var(--border); padding-top: 26px; display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 13px; gap: 16px; flex-wrap: wrap; }
   .footer-bottom-links { display: flex; gap: 24px; }
-  .footer-bottom-links a { color: var(--ink-400); text-decoration: none; }
-  .footer-bottom-links a:hover { color: var(--orange-400); }
+  .footer-bottom-links a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .footer-bottom-links a:hover { color: var(--primary-light); }
+  .contact-li { display: flex; align-items: flex-start; gap: 10px; color: var(--muted); font-size: 13.5px; margin-bottom: 13px; }
+  .contact-li svg { color: var(--primary-light); flex-shrink: 0; margin-top: 3px; }
 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .hero-copy > * { animation: fadeUp 0.7s ease-out backwards; }
-  .hero-copy .eyebrow { animation-delay: 0.1s; }
-  .hero-copy h1 { animation-delay: 0.2s; }
-  .hero-copy p { animation-delay: 0.3s; }
-  .hero-copy .hero-cta { animation-delay: 0.4s; }
-  .hero-copy .hero-trust { animation-delay: 0.5s; }
+  /* ---------- Reveal animations ---------- */
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+  .reveal.in { opacity: 1; transform: none; }
+  .reveal[data-delay="1"] { transition-delay: 0.08s; }
+  .reveal[data-delay="2"] { transition-delay: 0.16s; }
+  .reveal[data-delay="3"] { transition-delay: 0.24s; }
+  .reveal[data-delay="4"] { transition-delay: 0.32s; }
+  .reveal[data-delay="5"] { transition-delay: 0.4s; }
 
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
-  }
-  .floating-card.fc-1 { animation: float 4s ease-in-out infinite; }
-  .floating-card.fc-2 { animation: float 4s ease-in-out infinite 2s; }
+  .hero-inner > * { opacity: 0; transform: translateY(24px); animation: heroUp 0.9s var(--ease) forwards; }
+  .hero-inner > *:nth-child(1) { animation-delay: 0.1s; }
+  .hero-inner > *:nth-child(2) { animation-delay: 0.24s; }
+  .hero-inner > *:nth-child(3) { animation-delay: 0.38s; }
+  .hero-inner > *:nth-child(4) { animation-delay: 0.52s; }
+  @keyframes heroUp { to { opacity: 1; transform: none; } }
 
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    *, *::before, *::after {
-      animation-duration: 0.001ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.001ms !important;
-    }
+    *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+    .reveal { opacity: 1; transform: none; }
+    .hero-inner > * { opacity: 1; transform: none; }
   }
 
-  @media (max-width: 1024px) {
-    .hero-grid { grid-template-columns: 1fr; }
-    .hero-visual { height: 380px; max-width: 500px; margin: 0 auto; }
-    .stats-grid { grid-template-columns: repeat(3, 1fr); }
-    .stat:nth-child(n+4) { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 24px; margin-top: 12px; }
-    .services-grid { grid-template-columns: repeat(2, 1fr); }
-    .flow-steps { grid-template-columns: repeat(2, 1fr); }
-    .flow-line { display: none; }
-    .why-grid { grid-template-columns: 1fr; }
-    .partners-logos { grid-template-columns: repeat(4, 1fr); row-gap: 24px; }
-    .footer-grid { grid-template-columns: 1fr 1fr; }
-    .cta-box { grid-template-columns: 1fr; }
-    .cta-actions { justify-content: flex-start; }
-  }
-  @media (max-width: 640px) {
-    .nav-links { display: none; }
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1080px) {
+    .nav-links, .nav-cta .auth-link, .nav-cta .btn { display: none; }
     .menu-toggle { display: block; }
-    .auth-link { display: none; }
-    .hero { padding: 120px 0 60px; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    .stat:nth-child(n+4) { border-top: 1px solid var(--border); }
+    .stat:nth-child(4) { border-inline-start: none; }
+    .services-grid, .tech-grid, .t-grid, .cases-grid { grid-template-columns: repeat(2, 1fr); }
+    .why-grid { grid-template-columns: 1fr; }
+    .int-grid { grid-template-columns: repeat(4, 1fr); }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+    .hero-kpis { display: none; }
+  }
+  @media (max-width: 720px) {
+    .hero { padding: 120px 0 80px; }
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .stat { border-inline-start: none; }
-    .services-grid { grid-template-columns: 1fr; }
-    .flow-steps { grid-template-columns: 1fr; }
-    .why-features { grid-template-columns: 1fr; }
-    .partners-logos { grid-template-columns: repeat(2, 1fr); }
-    .footer-grid { grid-template-columns: 1fr; }
-    .footer-bottom { flex-direction: column; gap: 14px; text-align: center; }
-    .cta-box { padding: 40px 28px; }
-    .floating-card { padding: 10px 14px; }
-    .fc-value { font-size: 14px; }
+    .stat { border-inline-start: none !important; }
+    .stat:nth-child(n+3) { border-top: 1px solid var(--border); }
+    .services-grid, .tech-grid, .t-grid, .cases-grid, .why-features { grid-template-columns: 1fr; }
+    .flow-steps { grid-template-columns: 1fr; gap: 30px; }
+    .flow-line { display: none; }
+    .int-grid { grid-template-columns: repeat(3, 1fr); }
+    .compare-head .ch-title { font-size: 13px; }
+    .cta-box { grid-template-columns: 1fr; padding: 44px 30px; }
+    .cta-actions { justify-content: flex-start; }
+    .footer-top { grid-template-columns: 1fr; }
+    .footer-news { grid-template-columns: 1fr; }
+    .news-form { flex-direction: column; }
+    .news-form input { min-width: 0; width: 100%; }
+    .footer-bottom { flex-direction: column; text-align: center; }
+    .scroll-hint { display: none; }
   }
 </style>
 </head>
 <body>
 
-<div class="nav-wrap">
+<!-- ============ NAV ============ -->
+<div class="nav-wrap" id="navwrap">
   <nav>
-    <a href="{{ $isRtl ? url('/') : url('/en') }}" class="brand" aria-label="NAVIX">
+    <a href="{{ $homeUrl }}" class="brand" aria-label="NAVIX">
       <img src="{{ asset('images/navix-logo.png') }}" alt="NAVIX" class="brand-logo">
     </a>
     <ul class="nav-links">
       <li><a href="#home" class="active">{{ __('landing.nav.home') }}</a></li>
-      <li><a href="#services">{{ __('landing.nav.services') }}</a></li>
-      <li><a href="#how">{{ __('landing.nav.how') }}</a></li>
-      <li><a href="#why">{{ __('landing.nav.why') }}</a></li>
-      <li><a href="#partners">{{ __('landing.nav.partners') }}</a></li>
-      <li><a href="#contact">{{ __('landing.nav.contact') }}</a></li>
+      <li class="has-mega">
+        <a href="#services">{{ __('landing.nav.services') }}
+          <svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </a>
+        <div class="mega">
+          @php
+            $mega = [
+              ['mega_warehousing','mega_warehousing_desc','#services','M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z M9 22V12h6v10'],
+              ['mega_fulfillment','mega_fulfillment_desc','#services','M12 2L2 7l10 5 10-5-10-5z M2 17l10 5 10-5 M2 12l10 5 10-5'],
+              ['mega_transport','mega_transport_desc','#services','M1 3h15v13H1z M16 8h4l3 3v5h-7V8z M5.5 18.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z M18.5 18.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z'],
+              ['mega_lastmile','mega_lastmile_desc','#services','M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z M12 13a3 3 0 100-6 3 3 0 000 6z'],
+              ['mega_tracking','mega_tracking_desc', ($isRtl ? url('/track') : url('/en/track')),'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M9 12l2 2 4-4'],
+              ['mega_returns','mega_returns_desc','#services','M1 4v6h6 M23 20v-6h-6 M20.49 9A9 9 0 005.64 5.64L1 10 M3.51 15a9 9 0 0014.85 3.36L23 14'],
+            ];
+          @endphp
+          @foreach($mega as $m)
+          <a class="mega-item" href="{{ $m[2] }}">
+            <span class="mega-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ $m[3] }}"/></svg></span>
+            <span><h6>{{ __('landing.nav.'.$m[0]) }}</h6><span>{{ __('landing.nav.'.$m[1]) }}</span></span>
+          </a>
+          @endforeach
+        </div>
+      </li>
+      <li><a href="{{ $isRtl ? url('/track') : url('/en/track') }}">{{ __('landing.nav.tracking') }}</a></li>
+      <li><a href="#integrations">{{ __('landing.nav.integrations') }}</a></li>
+      <li><a href="{{ $isRtl ? url('/partners') : url('/en/partners') }}">{{ __('landing.nav.partners') }}</a></li>
     </ul>
     <div class="nav-cta">
       @auth
@@ -793,362 +675,303 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
         {{ __('landing.nav.lang_switch_label') }}
       </a>
-      <a href="#contact" class="btn btn-primary">
+      <a href="mailto:info@navix.com.sa?subject=Request%20a%20Quote" class="btn btn-primary">
         {{ __('landing.nav.quote_cta') }}
-        <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </a>
     </div>
-    <button class="menu-toggle" aria-label="menu">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+    <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
     </button>
   </nav>
 </div>
 
+<!-- ============ MOBILE DRAWER ============ -->
+<div class="drawer" id="drawer">
+  <button class="drawer-close" id="drawerClose" aria-label="Close menu">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+  </button>
+  <a href="#home">{{ __('landing.nav.home') }}</a>
+  <a href="#services">{{ __('landing.nav.services') }}</a>
+  <a href="{{ $isRtl ? url('/track') : url('/en/track') }}">{{ __('landing.nav.tracking') }}</a>
+  <a href="#why">{{ __('landing.nav.why') }}</a>
+  <a href="#integrations">{{ __('landing.nav.integrations') }}</a>
+  <a href="{{ $isRtl ? url('/partners') : url('/en/partners') }}">{{ __('landing.nav.partners') }}</a>
+  <a href="mailto:info@navix.com.sa?subject=Request%20a%20Quote" class="btn btn-primary drawer-cta">{{ __('landing.nav.quote_cta') }}</a>
+</div>
+
+<!-- ============ HERO ============ -->
 <section class="hero" id="home">
-  <div class="container hero-grid">
-    <div class="hero-copy">
-      <span class="eyebrow">{{ __('landing.hero.eyebrow') }}</span>
+  <div class="hero-bg">
+    <img src="{{ asset('images/hero.png') }}" alt="{{ __('landing.hero.eyebrow') }}" fetchpriority="high">
+  </div>
+  <div class="hero-motion" data-motion="hero" aria-hidden="true"></div>
+  <div class="hero-glow"></div>
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-badge"><span class="dot"></span>{{ __('landing.hero.badge') }}</div>
       <h1>
         {{ __('landing.hero.title_line_1') }}<br>
-        @if (trim(__('landing.hero.title_line_2_prefix')) !== '')
-          {{ __('landing.hero.title_line_2_prefix') }}
-        @endif
-        <span class="accent">{{ __('landing.hero.title_accent') }}</span>
+        @if (trim(__('landing.hero.title_line_2_prefix')) !== ''){{ __('landing.hero.title_line_2_prefix') }} @endif<span class="accent">{{ __('landing.hero.title_accent') }}</span>
       </h1>
       <p>{{ __('landing.hero.paragraph') }}</p>
       <div class="hero-cta">
-        <a href="#contact" class="btn btn-primary">
+        <a href="mailto:info@navix.com.sa?subject=Request%20a%20Quote" class="btn btn-primary">
           {{ __('landing.hero.cta_primary') }}
-          <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
         <a href="#services" class="btn btn-ghost">{{ __('landing.hero.cta_secondary') }}</a>
       </div>
-      <div class="hero-trust">
-        <div class="avatars">
-          <div class="avatar">SN</div>
-          <div class="avatar">NA</div>
-          <div class="avatar">IH</div>
-          <div class="avatar">+</div>
-        </div>
-        <span>{!! __('landing.hero.trust', ['count' => '<strong style="color:var(--white)">' . e(__('landing.hero.trust_count')) . '</strong>']) !!}</span>
-      </div>
-    </div>
-
-    <div class="hero-visual">
-      <div class="x-chevron">
-        <div class="chevron-shape">
-          <svg viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#FF8C2E"/>
-                <stop offset="100%" stop-color="#D8651A"/>
-              </linearGradient>
-              <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1E3D72"/>
-                <stop offset="100%" stop-color="#0F2548"/>
-              </linearGradient>
-              <linearGradient id="gWhite" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
-                <stop offset="100%" stop-color="#E4E8F0" stop-opacity="0.85"/>
-              </linearGradient>
-            </defs>
-            <path d="M 260 60 L 380 60 L 480 250 L 380 440 L 260 440 L 360 250 Z" fill="url(#g1)" opacity="0.95"/>
-            <path d="M 20 60 L 140 60 L 240 250 L 140 440 L 20 440 L 120 250 Z" fill="url(#gWhite)" opacity="0.9"/>
-            <g transform="translate(180, 200)">
-              <rect x="0" y="20" width="90" height="60" rx="6" fill="url(#g2)" stroke="#0A1A35" stroke-width="2"/>
-              <rect x="90" y="35" width="50" height="45" rx="4" fill="url(#g2)" stroke="#0A1A35" stroke-width="2"/>
-              <rect x="100" y="42" width="32" height="20" rx="2" fill="#FF8C2E" opacity="0.8"/>
-              <circle cx="25" cy="85" r="10" fill="#0A1A35" stroke="#FF8C2E" stroke-width="2"/>
-              <circle cx="115" cy="85" r="10" fill="#0A1A35" stroke="#FF8C2E" stroke-width="2"/>
-              <text x="20" y="58" font-family="Arial, sans-serif" font-weight="900" font-size="14" fill="#FFFFFF">NAVIX</text>
-            </g>
-            <circle cx="80" cy="120" r="4" fill="#FF8C2E"/>
-            <circle cx="420" cy="120" r="4" fill="#FF8C2E"/>
-            <circle cx="80" cy="380" r="4" fill="#FFFFFF"/>
-            <circle cx="420" cy="380" r="4" fill="#FFFFFF"/>
-          </svg>
-        </div>
-      </div>
-
-      <div class="floating-card fc-1">
-        <div class="fc-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-        </div>
-        <div class="fc-meta">
-          <span class="fc-label">{{ __('landing.hero.fc_label_1') }}</span>
-          <span class="fc-value">99.5%</span>
-        </div>
-      </div>
-
-      <div class="floating-card fc-2">
-        <div class="pulse-dot"></div>
-        <div class="fc-meta">
-          <span class="fc-label">{{ __('landing.hero.fc_label_2') }}</span>
-          <span class="fc-value">+1,240</span>
-        </div>
-      </div>
     </div>
   </div>
+
+  <div class="hero-kpis">
+    <div class="kpi-card k1">
+      <span class="kpi-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></span>
+      <span class="kpi-meta"><span class="kpi-value">{{ __('landing.hero.kpi_1_value') }}</span><span class="kpi-label">{{ __('landing.hero.kpi_1_label') }}</span></span>
+    </div>
+    <div class="kpi-card k2">
+      <span class="kpi-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>
+      <span class="kpi-meta"><span class="kpi-value">{{ __('landing.hero.kpi_2_value') }}</span><span class="kpi-label">{{ __('landing.hero.kpi_2_label') }}</span></span>
+    </div>
+    <div class="kpi-card k3">
+      <span class="kpi-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></span>
+      <span class="kpi-meta"><span class="kpi-value">{{ __('landing.hero.kpi_3_value') }}</span><span class="kpi-label">{{ __('landing.hero.kpi_3_label') }}</span></span>
+    </div>
+  </div>
+
+  <div class="scroll-hint"><span class="scroll-mouse"></span>{{ __('landing.hero.scroll') }}</div>
 </section>
 
+
+<!-- ============ STATS ============ -->
 <section class="stats">
   <div class="container">
-    <div class="stats-grid">
+    <div class="section-head center reveal">
+      <span class="eyebrow">{{ __('landing.stats.eyebrow') }}</span>
+      <h2 class="h-section">{{ __('landing.stats.title_lead') }} <span class="accent">{{ __('landing.stats.title_accent') }}</span></h2>
+      <p class="sub-section">{{ __('landing.stats.sub') }}</p>
+    </div>
+    <div class="stats-grid reveal">
+      @php
+        $stats = [
+          ['12', '', 'countries_label'],
+          ['8', 'M', 'deliveries_label'],
+          ['50', 'K', 'warehouses_label'],
+          ['640', '', 'fleet_label'],
+          ['500', '', 'customers_label'],
+        ];
+      @endphp
+      @foreach($stats as $s)
       <div class="stat">
-        <div class="stat-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-        </div>
-        <div class="stat-value">99.5%</div>
-        <div class="stat-label">{{ __('landing.stats.accuracy') }}</div>
+        <div class="stat-value"><span class="count" data-target="{{ $s[0] }}">0</span><span class="u">{{ $s[1] }}{{ __('landing.stats.suffix_plus') }}</span></div>
+        <div class="stat-label">{{ __('landing.stats.'.$s[2]) }}</div>
       </div>
-      <div class="stat">
-        <div class="stat-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-9 8.5 8.5 8.5 0 01-7.6-4.7L3 21l1.7-1.4A8.38 8.38 0 013 11.5a8.5 8.5 0 0117 0z"/></svg>
-        </div>
-        <div class="stat-value">24/7</div>
-        <div class="stat-label">{{ __('landing.stats.support') }}</div>
-      </div>
-      <div class="stat">
-        <div class="stat-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.27 6.96L12 12l8.73-5.04M12 22.08V12"/></svg>
-        </div>
-        <div class="stat-value">+1M</div>
-        <div class="stat-label">{{ __('landing.stats.orders') }}</div>
-      </div>
-      <div class="stat">
-        <div class="stat-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
-        </div>
-        <div class="stat-value">+50K</div>
-        <div class="stat-label">{{ __('landing.stats.storage') }}</div>
-      </div>
-      <div class="stat">
-        <div class="stat-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-        </div>
-        <div class="stat-value">+500</div>
-        <div class="stat-label">{{ __('landing.stats.clients') }}</div>
-      </div>
+      @endforeach
     </div>
   </div>
 </section>
 
+<!-- ============ SERVICES ============ -->
 <section class="services" id="services">
   <div class="container">
-    <div class="section-head">
+    <div class="section-head reveal">
       <span class="eyebrow">{{ __('landing.services.eyebrow') }}</span>
       <h2 class="h-section">{{ __('landing.services.title_lead') }} <span class="accent">{{ __('landing.services.title_accent') }}</span></h2>
       <p class="sub-section">{{ __('landing.services.sub') }}</p>
     </div>
     <div class="services-grid">
-      <div class="service-card">
+      @php
+        $services = [
+          ['warehousing','M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z|M9 22V12h6v10'],
+          ['fulfillment','M12 2L2 7l10 5 10-5-10-5z|M2 17l10 5 10-5|M2 12l10 5 10-5'],
+          ['transport','M1 3h15v13H1z|M16 8h4l3 3v5h-7V8z|M5.5 21a2.5 2.5 0 100-5 2.5 2.5 0 000 5z|M18.5 21a2.5 2.5 0 100-5 2.5 2.5 0 000 5z'],
+          ['lastmile','M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z|M12 13a3 3 0 100-6 3 3 0 000 6z'],
+          ['tracking','M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z|M9 12l2 2 4-4'],
+          ['returns','M1 4v6h6|M23 20v-6h-6|M20.49 9A9 9 0 005.64 5.64L1 10|M3.51 15a9 9 0 0014.85 3.36L23 14'],
+        ];
+      @endphp
+      @foreach($services as $i => $sv)
+      <div class="service-card reveal" data-delay="{{ $i % 3 }}" data-tilt>
         <div class="service-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            @foreach(explode('|', $sv[1]) as $p)<path d="{{ $p }}"/>@endforeach
+          </svg>
         </div>
-        <h3>{{ __('landing.services.shipping_title') }}</h3>
-        <p>{{ __('landing.services.shipping_desc') }}</p>
-        <span class="more">{{ __('landing.services.more') }} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span>
+        <h3>{{ __('landing.services.'.$sv[0].'_title') }}</h3>
+        <p>{{ __('landing.services.'.$sv[0].'_desc') }}</p>
+        <span class="more">{{ __('landing.services.more') }}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
       </div>
-      <div class="service-card">
-        <div class="service-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-        <h3>{{ __('landing.services.sameday_title') }}</h3>
-        <p>{{ __('landing.services.sameday_desc') }}</p>
-        <span class="more">{{ __('landing.services.more') }} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span>
-      </div>
-      <div class="service-card">
-        <div class="service-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-        </div>
-        <h3>{{ __('landing.services.fulfillment_title') }}</h3>
-        <p>{{ __('landing.services.fulfillment_desc') }}</p>
-        <span class="more">{{ __('landing.services.more') }} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span>
-      </div>
-      <div class="service-card">
-        <div class="service-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        </div>
-        <h3>{{ __('landing.services.warehousing_title') }}</h3>
-        <p>{{ __('landing.services.warehousing_desc') }}</p>
-        <span class="more">{{ __('landing.services.more') }} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span>
-      </div>
-      <div class="service-card">
-        <div class="service-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
-        </div>
-        <h3>{{ __('landing.services.returns_title') }}</h3>
-        <p>{{ __('landing.services.returns_desc') }}</p>
-        <span class="more">{{ __('landing.services.more') }} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span>
-      </div>
+      @endforeach
     </div>
   </div>
 </section>
 
-<section class="how-section" id="how">
-  <div class="container">
-    <div class="section-head">
-      <span class="eyebrow">{{ __('landing.how.eyebrow') }}</span>
-      <h2 class="h-section">{{ __('landing.how.title_lead') }} <span class="accent">{{ __('landing.how.title_accent') }}</span></h2>
-      <p class="sub-section">{{ __('landing.how.sub') }}</p>
-    </div>
-    <div class="how-flow">
-      <div class="flow-steps">
-        <div class="flow-line"></div>
-        <div class="flow-step">
-          <div class="step-num">1</div>
-          <div class="step-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          </div>
-          <h4>{{ __('landing.how.step_1_title') }}</h4>
-          <p>{{ __('landing.how.step_1_desc') }}</p>
-        </div>
-        <div class="flow-step">
-          <div class="step-num">2</div>
-          <div class="step-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-          </div>
-          <h4>{{ __('landing.how.step_2_title') }}</h4>
-          <p>{{ __('landing.how.step_2_desc') }}</p>
-        </div>
-        <div class="flow-step">
-          <div class="step-num">3</div>
-          <div class="step-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-          </div>
-          <h4>{{ __('landing.how.step_3_title') }}</h4>
-          <p>{{ __('landing.how.step_3_desc') }}</p>
-        </div>
-        <div class="flow-step">
-          <div class="step-num">4</div>
-          <div class="step-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-          </div>
-          <h4>{{ __('landing.how.step_4_title') }}</h4>
-          <p>{{ __('landing.how.step_4_desc') }}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
+<!-- ============ WHY ============ -->
 <section class="why" id="why">
   <div class="container">
     <div class="why-grid">
-      <div>
+      <div class="reveal">
         <span class="eyebrow">{{ __('landing.why.eyebrow') }}</span>
         <h2 class="h-section">{{ __('landing.why.title_lead') }} <span class="accent">{{ __('landing.why.title_accent') }}</span></h2>
         <p class="sub-section">{{ __('landing.why.sub') }}</p>
         <div class="why-features">
+          @php
+            $whys = [
+              ['item_1','M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'],
+              ['item_2','M12 6v6l4 2|M12 22a10 10 0 100-20 10 10 0 000 20z'],
+              ['item_3','M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z|M12 13a3 3 0 100-6 3 3 0 000 6z'],
+              ['item_4','M13 2L3 14h9l-1 8 10-12h-9l1-8z'],
+            ];
+          @endphp
+          @foreach($whys as $w)
           <div class="why-item">
-            <div class="why-item-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </div>
-            <h4>{{ __('landing.why.item_1_title') }}</h4>
-            <p>{{ __('landing.why.item_1_desc') }}</p>
+            <div class="why-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">@foreach(explode('|', $w[1]) as $p)<path d="{{ $p }}"/>@endforeach</svg></div>
+            <h4>{{ __('landing.why.'.$w[0].'_title') }}</h4>
+            <p>{{ __('landing.why.'.$w[0].'_desc') }}</p>
           </div>
-          <div class="why-item">
-            <div class="why-item-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </div>
-            <h4>{{ __('landing.why.item_2_title') }}</h4>
-            <p>{{ __('landing.why.item_2_desc') }}</p>
-          </div>
-          <div class="why-item">
-            <div class="why-item-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            </div>
-            <h4>{{ __('landing.why.item_3_title') }}</h4>
-            <p>{{ __('landing.why.item_3_desc') }}</p>
-          </div>
-          <div class="why-item">
-            <div class="why-item-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-            </div>
-            <h4>{{ __('landing.why.item_4_title') }}</h4>
-            <p>{{ __('landing.why.item_4_desc') }}</p>
-          </div>
+          @endforeach
         </div>
       </div>
 
-      <div class="why-visual">
-        <div class="why-badge wb-1">
-          <div class="wb-title">{{ __('landing.why.badge_1_title') }}</div>
-          <div class="wb-val">+84,200</div>
-          <div class="wb-progress"><div class="wb-bar" style="width: 86%"></div></div>
+      <div class="compare reveal" data-delay="1">
+        <div class="compare-head">
+          <div class="ch-title">{{ __('landing.why.compare_heading') }}</div>
+          <div class="ch navix">{{ __('landing.why.col_navix') }}</div>
+          <div class="ch legacy">{{ __('landing.why.col_legacy') }}</div>
         </div>
-        <div class="why-badge wb-2">
-          <div class="wb-title">{{ __('landing.why.badge_2_title') }}</div>
-          <div class="wb-val">4.9 / 5.0</div>
-          <div style="display: flex; gap: 2px; margin-top: 8px;">
-            <span style="color: var(--orange-400);">★</span><span style="color: var(--orange-400);">★</span><span style="color: var(--orange-400);">★</span><span style="color: var(--orange-400);">★</span><span style="color: var(--orange-400);">★</span>
-          </div>
+        @foreach(['row_1','row_2','row_3','row_4','row_5'] as $row)
+        <div class="compare-row">
+          <span>{{ __('landing.why.'.$row) }}</span>
+          <div class="cell"><svg class="ok" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+          <div class="cell"><svg class="no" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
         </div>
-        <div class="why-badge wb-3">
-          <div class="wb-title">{{ __('landing.why.badge_3_title') }}</div>
-          <div class="wb-val">{{ __('landing.why.badge_3_value') }}</div>
-        </div>
+        @endforeach
       </div>
     </div>
   </div>
 </section>
 
-<section class="partners" id="partners">
+<!-- ============ HOW ============ -->
+<section class="how" id="how">
+  <div class="how-glow"></div>
   <div class="container">
-    <div class="partners-title">{{ __('landing.partners_title') }}</div>
-    <div class="partners-logos">
-      <div class="partner-logo">noon</div>
-      <div class="partner-logo">SHEIN</div>
-      <div class="partner-logo">Humana</div>
-      <div class="partner-logo">floward</div>
-      <div class="partner-logo">NICE ONE</div>
-      <div class="partner-logo">iHerb</div>
-      <div class="partner-logo">NAMSHI</div>
+    <div class="section-head center reveal">
+      <span class="eyebrow">{{ __('landing.how.eyebrow') }}</span>
+      <h2 class="h-section">{{ __('landing.how.title_lead') }} <span class="accent">{{ __('landing.how.title_accent') }}</span></h2>
+      <p class="sub-section">{{ __('landing.how.sub') }}</p>
+    </div>
+    <div class="flow-steps">
+      <div class="flow-line"></div>
+      @php
+        $steps = [
+          ['step_1','M4 17l6-6-6-6|M12 19h8'],
+          ['step_2','M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z|M9 22V12h6v10'],
+          ['step_3','M12 2L2 7l10 5 10-5-10-5z|M2 17l10 5 10-5M2 12l10 5 10-5'],
+          ['step_4','M1 3h15v13H1z|M16 8h4l3 3v5h-7V8z|M5.5 21a2.5 2.5 0 100-5 2.5 2.5 0 000 5z|M18.5 21a2.5 2.5 0 100-5 2.5 2.5 0 000 5z'],
+        ];
+      @endphp
+      @foreach($steps as $i => $st)
+      <div class="flow-step reveal" data-delay="{{ $i }}">
+        <div class="step-num">{{ $i + 1 }}
+          <span class="step-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">@foreach(explode('|', $st[1]) as $p)<path d="{{ $p }}"/>@endforeach</svg></span>
+        </div>
+        <h4>{{ __('landing.how.'.$st[0].'_title') }}</h4>
+        <p>{{ __('landing.how.'.$st[0].'_desc') }}</p>
+      </div>
+      @endforeach
     </div>
   </div>
 </section>
 
+<!-- ============ INTEGRATIONS ============ -->
+<section class="integrations" id="integrations">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="eyebrow">{{ __('landing.integrations.eyebrow') }}</span>
+      <h2 class="h-section">{{ __('landing.integrations.title_lead') }} <span class="accent">{{ __('landing.integrations.title_accent') }}</span></h2>
+      <p class="sub-section">{{ __('landing.integrations.sub') }}</p>
+    </div>
+    <div class="int-grid reveal">
+      @foreach(['Shopify','WooCommerce','Salla','Zid','Magento','Amazon','Noon','Shopify Plus','BigCommerce','Odoo','SAP','Zapier','Slack','QuickBooks'] as $int)
+        <div class="int-cell">{{ $int }}</div>
+      @endforeach
+    </div>
+    <div class="int-center reveal">
+      <a href="#contact" class="int-link">{{ __('landing.integrations.cta') }}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CASE STUDIES ============ -->
+<section class="cases">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="eyebrow">{{ __('landing.cases.eyebrow') }}</span>
+      <h2 class="h-section">{{ __('landing.cases.title_lead') }} <span class="accent">{{ __('landing.cases.title_accent') }}</span></h2>
+      <p class="sub-section">{{ __('landing.cases.sub') }}</p>
+    </div>
+    <div class="cases-grid">
+      @foreach(['c1','c2','c3'] as $i => $c)
+      <div class="case-card reveal" data-delay="{{ $i }}">
+        <div class="case-metric">{{ __('landing.cases.'.$c.'_metric') }}</div>
+        <div class="case-label">{{ __('landing.cases.'.$c.'_label') }}</div>
+        <p>{{ __('landing.cases.'.$c.'_desc') }}</p>
+        <a href="#contact" class="case-read">{{ __('landing.cases.read') }}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+      @endforeach
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
 <section class="cta-banner" id="contact">
   <div class="container">
-    <div class="cta-box">
+    <div class="cta-box reveal">
+      <div class="cta-motion" data-motion="cta" aria-hidden="true"></div>
       <div>
+        <span class="eyebrow">{{ __('landing.cta.eyebrow') }}</span>
         <h2>{{ __('landing.cta.title') }}</h2>
         <p>{{ __('landing.cta.sub') }}</p>
       </div>
       <div class="cta-actions">
-        @if (Route::has('register'))
-          <a href="{{ route('register') }}" class="btn btn-primary">
-            {{ __('landing.cta.primary') }}
-            <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          </a>
-        @endif
+        <a href="mailto:info@navix.com.sa?subject=Request%20a%20Quote" class="btn btn-primary">
+          {{ __('landing.cta.primary') }}
+          <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
         <a href="mailto:info@navix.com.sa" class="btn btn-ghost">{{ __('landing.cta.secondary') }}</a>
       </div>
     </div>
   </div>
 </section>
 
+<!-- ============ FOOTER ============ -->
 <footer>
   <div class="container">
-    <div class="footer-grid">
+    <div class="footer-news reveal">
+      <div>
+        <h4>{{ __('landing.footer.newsletter_title') }}</h4>
+        <p>{{ __('landing.footer.newsletter_desc') }}</p>
+      </div>
+      <form class="news-form" onsubmit="return false">
+        <input type="email" placeholder="{{ __('landing.footer.newsletter_placeholder') }}" aria-label="{{ __('landing.footer.newsletter_placeholder') }}">
+        <button type="submit" class="btn btn-primary">{{ __('landing.footer.newsletter_cta') }}</button>
+      </form>
+    </div>
+
+    <div class="footer-top">
       <div class="footer-brand">
-        <a href="{{ $isRtl ? url('/') : url('/en') }}" class="brand">
-          <img src="{{ asset('images/navix-logo.png') }}" alt="NAVIX" class="brand-logo">
-        </a>
+        <a href="{{ $homeUrl }}" class="brand"><img src="{{ asset('images/navix-logo.png') }}" alt="NAVIX" class="brand-logo"></a>
         <p>{{ __('landing.footer.brand_desc') }}</p>
         <div class="socials">
-          <a href="#" class="social-icon" aria-label="LinkedIn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"/></svg>
-          </a>
-          <a href="#" class="social-icon" aria-label="X">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-          </a>
-          <a href="#" class="social-icon" aria-label="Instagram">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zM17.5 6.5h.01"/></svg>
-          </a>
-          <a href="#" class="social-icon" aria-label="WhatsApp">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-          </a>
+          <a href="https://www.facebook.com/profile.php?id=61590446084332" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07c0 6.03 4.39 11.03 10.12 11.93v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.89v2.25h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/></svg></a>
+          <a href="https://www.instagram.com/navix.ksa/" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zM17.5 6.5h.01"/></svg></a>
         </div>
       </div>
 
@@ -1157,30 +980,20 @@
         <ul>
           <li><a href="#services">{{ __('landing.footer.service_warehousing') }}</a></li>
           <li><a href="#services">{{ __('landing.footer.service_fulfillment') }}</a></li>
-          <li><a href="#services">{{ __('landing.footer.service_shipping') }}</a></li>
-          <li><a href="#services">{{ __('landing.footer.service_sameday') }}</a></li>
+          <li><a href="#services">{{ __('landing.footer.service_transport') }}</a></li>
+          <li><a href="#services">{{ __('landing.footer.service_lastmile') }}</a></li>
           <li><a href="#services">{{ __('landing.footer.service_returns') }}</a></li>
         </ul>
       </div>
 
       <div class="footer-col">
-        <h5>{{ __('landing.footer.solutions_heading') }}</h5>
+        <h5>{{ __('landing.footer.menu_heading') }}</h5>
         <ul>
-          <li><a href="#">{{ __('landing.footer.solution_ecom') }}</a></li>
-          <li><a href="#">{{ __('landing.footer.solution_startup') }}</a></li>
-          <li><a href="#">{{ __('landing.footer.solution_enterprise') }}</a></li>
-          <li><a href="#">{{ __('landing.footer.solution_integration') }}</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h5>{{ __('landing.footer.quick_heading') }}</h5>
-        <ul>
-          <li><a href="#">{{ __('landing.footer.quick_about') }}</a></li>
-          <li><a href="#">{{ __('landing.footer.quick_pricing') }}</a></li>
-          <li><a href="#">{{ __('landing.footer.quick_resources') }}</a></li>
-          <li><a href="#">{{ __('landing.footer.quick_blog') }}</a></li>
-          <li><a href="#contact">{{ __('landing.footer.quick_contact') }}</a></li>
+          <li><a href="#home">{{ __('landing.nav.home') }}</a></li>
+          <li><a href="#services">{{ __('landing.nav.services') }}</a></li>
+          <li><a href="{{ $isRtl ? url('/track') : url('/en/track') }}">{{ __('landing.nav.tracking') }}</a></li>
+          <li><a href="#integrations">{{ __('landing.nav.integrations') }}</a></li>
+          <li><a href="{{ $isRtl ? url('/partners') : url('/en/partners') }}">{{ __('landing.nav.partners') }}</a></li>
         </ul>
       </div>
 
@@ -1215,17 +1028,60 @@
 </footer>
 
 <script>
-  const sections = document.querySelectorAll('section[id]');
-  const navLinks = document.querySelectorAll('.nav-links a');
-  window.addEventListener('scroll', () => {
-    let current = '';
-    sections.forEach(s => {
-      const top = s.offsetTop - 100;
-      if (window.scrollY >= top) current = s.id;
-    });
-    navLinks.forEach(l => {
-      l.classList.remove('active');
-      if (l.getAttribute('href') === '#' + current) l.classList.add('active');
+  // Navbar solidify on scroll
+  const navwrap = document.getElementById('navwrap');
+  const onScroll = () => navwrap.classList.toggle('scrolled', window.scrollY > 20);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // Active nav link on scroll-spy
+  const sections = [...document.querySelectorAll('section[id]')];
+  const navLinks = [...document.querySelectorAll('.nav-links > li > a')];
+  const spy = () => {
+    let current = 'home';
+    for (const s of sections) { if (window.scrollY >= s.offsetTop - 120) current = s.id; }
+    navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + current));
+  };
+  window.addEventListener('scroll', spy, { passive: true });
+
+  // Mobile drawer
+  const drawer = document.getElementById('drawer');
+  document.getElementById('menuToggle').addEventListener('click', () => drawer.classList.add('open'));
+  document.getElementById('drawerClose').addEventListener('click', () => drawer.classList.remove('open'));
+  drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', () => drawer.classList.remove('open')));
+
+  // Reveal on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Animated counters
+  const easeOut = t => 1 - Math.pow(1 - t, 3);
+  const runCount = (el) => {
+    const target = parseFloat(el.dataset.target);
+    const dur = 1600; let start = null;
+    const step = (ts) => {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / dur, 1);
+      const val = target * easeOut(p);
+      el.textContent = target >= 100 ? Math.floor(val).toLocaleString() : val.toFixed(val < 10 && target % 1 === 0 ? 0 : 0);
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = Number.isInteger(target) ? target.toLocaleString() : target;
+    };
+    requestAnimationFrame(step);
+  };
+  const countIO = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { runCount(e.target); countIO.unobserve(e.target); } });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.count').forEach(el => countIO.observe(el));
+
+  // Spotlight tilt on service cards
+  document.querySelectorAll('[data-tilt]').forEach(card => {
+    card.addEventListener('pointermove', (e) => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+      card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
     });
   });
 </script>
