@@ -56,6 +56,27 @@ Route::get('/en/partners', function () {
     return view('partners');
 })->name('partners.en');
 
+// Legal pages (Privacy Policy & Terms) — bilingual.
+Route::get('/privacy', function () {
+    app()->setLocale('ar');
+    return view('legal', ['page' => 'privacy']);
+})->name('privacy');
+
+Route::get('/en/privacy', function () {
+    app()->setLocale('en');
+    return view('legal', ['page' => 'privacy']);
+})->name('privacy.en');
+
+Route::get('/terms', function () {
+    app()->setLocale('ar');
+    return view('legal', ['page' => 'terms']);
+})->name('terms');
+
+Route::get('/en/terms', function () {
+    app()->setLocale('en');
+    return view('legal', ['page' => 'terms']);
+})->name('terms.en');
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),

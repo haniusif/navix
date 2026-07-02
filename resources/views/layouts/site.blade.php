@@ -286,8 +286,8 @@
     <div class="footer-bottom">
       <div>© {{ date('Y') }} NAVIX Logistics Services — {{ __('landing.footer.copyright') }}</div>
       <div class="footer-bottom-links">
-        <a href="#">{{ __('landing.footer.privacy') }}</a>
-        <a href="#">{{ __('landing.footer.terms') }}</a>
+        <a href="{{ $isRtl ? url('/privacy') : url('/en/privacy') }}">{{ __('landing.footer.privacy') }}</a>
+        <a href="{{ $isRtl ? url('/terms') : url('/en/terms') }}">{{ __('landing.footer.terms') }}</a>
         <a href="https://navix.com.sa">navix.com.sa</a>
       </div>
     </div>
