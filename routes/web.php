@@ -56,6 +56,31 @@ Route::get('/en/partners', function () {
     return view('partners');
 })->name('partners.en');
 
+// Newsroom — bilingual. Article registry lives in config/news.php (shared with the homepage teaser).
+Route::get('/news', function () {
+    app()->setLocale('ar');
+    return view('news.index', ['articles' => config('news.articles')]);
+})->name('news');
+
+Route::get('/en/news', function () {
+    app()->setLocale('en');
+    return view('news.index', ['articles' => config('news.articles')]);
+})->name('news.en');
+
+Route::get('/news/{slug}', function (string $slug) {
+    $articles = config('news.articles');
+    abort_unless(isset($articles[$slug]), 404);
+    app()->setLocale('ar');
+    return view('news.show', ['article' => $articles[$slug], 'articles' => $articles]);
+})->name('news.show');
+
+Route::get('/en/news/{slug}', function (string $slug) {
+    $articles = config('news.articles');
+    abort_unless(isset($articles[$slug]), 404);
+    app()->setLocale('en');
+    return view('news.show', ['article' => $articles[$slug], 'articles' => $articles]);
+})->name('news.show.en');
+
 // Legal pages (Privacy Policy & Terms) — bilingual.
 Route::get('/privacy', function () {
     app()->setLocale('ar');

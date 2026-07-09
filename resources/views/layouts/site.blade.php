@@ -200,6 +200,7 @@
       <li><a href="{{ $isRtl ? url('/track') : url('/en/track') }}" class="{{ $activeNav === 'track' ? 'active' : '' }}">{{ __('landing.nav.tracking') }}</a></li>
       <li><a href="{{ $anchorBase }}#integrations">{{ __('landing.nav.integrations') }}</a></li>
       <li><a href="{{ $isRtl ? url('/partners') : url('/en/partners') }}" class="{{ $activeNav === 'partners' ? 'active' : '' }}">{{ __('landing.nav.partners') }}</a></li>
+      <li><a href="{{ $isRtl ? url('/news') : url('/en/news') }}" class="{{ $activeNav === 'news' ? 'active' : '' }}">{{ __('landing.nav.news') }}</a></li>
     </ul>
     <div class="nav-cta">
       @auth
@@ -229,6 +230,7 @@
   <a href="{{ $isRtl ? url('/track') : url('/en/track') }}">{{ __('landing.nav.tracking') }}</a>
   <a href="{{ $anchorBase }}#integrations">{{ __('landing.nav.integrations') }}</a>
   <a href="{{ $isRtl ? url('/partners') : url('/en/partners') }}">{{ __('landing.nav.partners') }}</a>
+  <a href="{{ $isRtl ? url('/news') : url('/en/news') }}">{{ __('landing.nav.news') }}</a>
   <a href="mailto:info@navix.com.sa?subject=Request%20a%20Quote" class="btn btn-primary drawer-cta">{{ __('landing.nav.quote_cta') }}</a>
 </div>
 
@@ -265,6 +267,7 @@
           <li><a href="{{ $isRtl ? url('/track') : url('/en/track') }}">{{ __('landing.nav.tracking') }}</a></li>
           <li><a href="{{ $anchorBase }}#integrations">{{ __('landing.nav.integrations') }}</a></li>
           <li><a href="{{ $isRtl ? url('/partners') : url('/en/partners') }}">{{ __('landing.nav.partners') }}</a></li>
+          <li><a href="{{ $isRtl ? url('/news') : url('/en/news') }}">{{ __('landing.nav.news') }}</a></li>
         </ul>
       </div>
       <div class="footer-col">
