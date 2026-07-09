@@ -666,6 +666,7 @@
       <li><a href="{{ $isRtl ? url('/track') : url('/en/track') }}">{{ __('landing.nav.tracking') }}</a></li>
       <li><a href="#integrations">{{ __('landing.nav.integrations') }}</a></li>
       <li><a href="{{ $isRtl ? url('/partners') : url('/en/partners') }}">{{ __('landing.nav.partners') }}</a></li>
+      <li><a href="{{ $isRtl ? url('/news') : url('/en/news') }}">{{ __('landing.nav.news') }}</a></li>
     </ul>
     <div class="nav-cta">
       @auth
@@ -697,6 +698,7 @@
   <a href="#why">{{ __('landing.nav.why') }}</a>
   <a href="#integrations">{{ __('landing.nav.integrations') }}</a>
   <a href="{{ $isRtl ? url('/partners') : url('/en/partners') }}">{{ __('landing.nav.partners') }}</a>
+  <a href="{{ $isRtl ? url('/news') : url('/en/news') }}">{{ __('landing.nav.news') }}</a>
   <a href="mailto:info@navix.com.sa?subject=Request%20a%20Quote" class="btn btn-primary drawer-cta">{{ __('landing.nav.quote_cta') }}</a>
 </div>
 
@@ -930,6 +932,88 @@
   </div>
 </section>
 
+<!-- ============ LATEST NEWS ============ -->
+@php
+    $homeNews = array_slice(array_values(config('news.articles', [])), 0, 3);
+    $newsIndexUrl = $isRtl ? url('/news') : url('/en/news');
+    $newsShow = fn($slug) => $isRtl ? url('/news/'.$slug) : url('/en/news/'.$slug);
+@endphp
+@if(count($homeNews))
+<style>
+  .home-news { padding: 40px 0 40px; }
+  .home-news-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 44px; flex-wrap: wrap; }
+  .home-news-head .section-head { margin-bottom: 0; }
+  .home-news-viewall { display: inline-flex; align-items: center; gap: 8px; color: var(--primary-light); font-family: var(--font-display); font-weight: 700; font-size: 15px; text-decoration: none; white-space: nowrap; transition: gap 0.25s var(--ease); }
+  .home-news-viewall:hover { gap: 12px; }
+  [dir="rtl"] .home-news-viewall svg { transform: scaleX(-1); }
+  .home-news-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .home-news-grid.single { grid-template-columns: 1fr; }
+  .home-news-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; text-decoration: none; display: flex; flex-direction: column; transition: transform 0.4s var(--ease), border-color 0.4s var(--ease); }
+  .home-news-card:hover { transform: translateY(-8px); border-color: rgba(255,122,26,0.3); }
+  .home-news-grid.single .home-news-card { flex-direction: row; align-items: stretch; }
+  .home-news-media { overflow: hidden; aspect-ratio: 16 / 10; flex-shrink: 0; }
+  .home-news-grid.single .home-news-media { aspect-ratio: auto; width: 46%; }
+  .home-news-media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s var(--ease); }
+  .home-news-card:hover .home-news-media img { transform: scale(1.05); }
+  .home-news-body { padding: 26px; display: flex; flex-direction: column; flex: 1; }
+  .home-news-grid.single .home-news-body { padding: 40px 44px; justify-content: center; }
+  .home-news-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .home-news-tag { background: var(--surface-2); border: 1px solid var(--border); color: var(--primary-light); font-size: 12.5px; font-weight: 600; padding: 5px 13px; border-radius: 999px; }
+  .home-news-date { color: var(--muted); font-size: 13px; font-family: var(--font-num); }
+  .home-news-body h3 { font-family: var(--font-display); font-weight: 700; font-size: 19px; line-height: 1.35; color: var(--white); }
+  .home-news-grid.single .home-news-body h3 { font-size: clamp(22px, 2.4vw, 30px); }
+  .home-news-body p { color: var(--muted); font-size: 14.5px; line-height: 1.65; margin-top: 12px; flex: 1; }
+  .home-news-grid.single .home-news-body p { font-size: 16px; }
+  .home-news-link { margin-top: 20px; display: inline-flex; align-items: center; gap: 8px; color: var(--primary-light); font-family: var(--font-display); font-weight: 700; font-size: 14.5px; align-self: flex-start; transition: gap 0.25s var(--ease); }
+  .home-news-card:hover .home-news-link { gap: 12px; }
+  [dir="rtl"] .home-news-link svg { transform: scaleX(-1); }
+  @media (max-width: 900px) {
+    .home-news-grid { grid-template-columns: 1fr 1fr; }
+    .home-news-grid.single .home-news-card { flex-direction: column; }
+    .home-news-grid.single .home-news-media { width: 100%; aspect-ratio: 16 / 9; }
+    .home-news-grid.single .home-news-body { padding: 30px 28px; }
+  }
+  @media (max-width: 640px) { .home-news-grid { grid-template-columns: 1fr; } }
+</style>
+<section class="home-news" id="news">
+  <div class="container">
+    <div class="home-news-head reveal">
+      <div class="section-head" style="max-width:640px;">
+        <span class="eyebrow">{{ __('landing.home_news.eyebrow') }}</span>
+        <h2 class="h-section">{{ __('landing.home_news.title_lead') }} <span class="accent">{{ __('landing.home_news.title_accent') }}</span></h2>
+        <p class="sub-section">{{ __('landing.home_news.sub') }}</p>
+      </div>
+      <a href="{{ $newsIndexUrl }}" class="home-news-viewall">
+        {{ __('landing.home_news.view_all') }}
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+    <div class="home-news-grid {{ count($homeNews) === 1 ? 'single' : '' }}">
+      @foreach($homeNews as $i => $article)
+        @php $ak = 'news.articles.'.$article['key']; @endphp
+        <a class="home-news-card reveal" data-delay="{{ $i }}" href="{{ $newsShow($article['slug']) }}">
+          <div class="home-news-media">
+            <img src="{{ asset($article['cover']) }}" alt="{{ __($ak.'.title') }}" loading="lazy">
+          </div>
+          <div class="home-news-body">
+            <div class="home-news-meta">
+              <span class="home-news-tag">{{ __($ak.'.tag') }}</span>
+              <span class="home-news-date">{{ __($ak.'.date_label') }}</span>
+            </div>
+            <h3>{{ __($ak.'.title') }}</h3>
+            <p>{{ __($ak.'.excerpt') }}</p>
+            <span class="home-news-link">
+              {{ __('landing.home_news.read') }}
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </span>
+          </div>
+        </a>
+      @endforeach
+    </div>
+  </div>
+</section>
+@endif
+
 <!-- ============ CTA ============ -->
 <section class="cta-banner" id="contact">
   <div class="container">
@@ -996,6 +1080,7 @@
           <li><a href="{{ $isRtl ? url('/track') : url('/en/track') }}">{{ __('landing.nav.tracking') }}</a></li>
           <li><a href="#integrations">{{ __('landing.nav.integrations') }}</a></li>
           <li><a href="{{ $isRtl ? url('/partners') : url('/en/partners') }}">{{ __('landing.nav.partners') }}</a></li>
+          <li><a href="{{ $isRtl ? url('/news') : url('/en/news') }}">{{ __('landing.nav.news') }}</a></li>
         </ul>
       </div>
 

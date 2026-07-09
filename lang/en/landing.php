@@ -12,6 +12,7 @@ return [
         'platform' => 'Platform',
         'tracking' => 'Track Shipment',
         'partners' => 'Partners',
+        'news' => 'Newsroom',
         'why' => 'Why NAVIX',
         'integrations' => 'Integrations',
         'customers' => 'Customers',
@@ -198,6 +199,15 @@ return [
         'c3_label' => 'Order accuracy',
         'c3_desc' => 'Automated pick-and-pack eliminated errors for a high-volume electronics seller.',
         'read' => 'Read case study',
+    ],
+
+    'home_news' => [
+        'eyebrow' => 'Newsroom',
+        'title_lead' => 'Latest',
+        'title_accent' => 'News',
+        'sub' => 'The newest partnerships, agreements, and announcements from NAVIX.',
+        'view_all' => 'All news',
+        'read' => 'Read story',
     ],
 
     'cta' => [
